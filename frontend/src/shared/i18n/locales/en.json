@@ -191,6 +191,7 @@
       "renameLabel": "Name of column {{name}}",
       "recolorLabel": "Color of column {{name}}",
       "done": "Done",
+      "doneColumn": "Done column",
       "markDone": "Use {{name}} as the done column",
       "moveUp": "Move {{name}} up",
       "moveDown": "Move {{name}} down",

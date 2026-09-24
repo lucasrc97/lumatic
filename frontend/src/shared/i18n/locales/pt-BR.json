@@ -191,6 +191,7 @@
       "renameLabel": "Nome da coluna {{name}}",
       "recolorLabel": "Cor da coluna {{name}}",
       "done": "Concluídas",
+      "doneColumn": "Coluna de concluídas",
       "markDone": "Usar {{name}} como coluna de concluídas",
       "moveUp": "Mover {{name}} para cima",
       "moveDown": "Mover {{name}} para baixo",

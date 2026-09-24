@@ -20,14 +20,16 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 - **Columns** (Kanban) are created, renamed, recolored and reordered in the UI. Exactly one column is the
   *done* column: a task gets `completed_at` when it enters it and loses it when it leaves. Only empty columns
   can be deleted, and the done column cannot be deleted.
-- **Priority** is a fixed field: none (default), low, medium or high. It colors the card's left border and tag.
+- **Priority** is a fixed field: none (default), low, medium or high. It colors the left edge and tag of the
+  Kanban card and of the list row (the list shows one task per row).
+- The done column is marked with a *Concluídas* badge on the board, so it is clear which tasks count as done.
 - The starting columns (*A fazer*, *Em andamento*, *Concluída*) are created by the migration; like any user
   data they are not translated.
 
 **Calendário** — a collapsible panel opened from the top bar, shown above the current page (the choice is
 remembered in the browser). It shows any month/year with dated items from every module: events and task
-due dates for now. Picking a day lists what is already scheduled there (the list can be collapsed with the
-arrow next to the date).
+due dates for now. Picking a day shows what is already scheduled there (the list starts collapsed and
+opens with the arrow next to the date).
 It is a view, not a module: it reads through each module's service and stores nothing (see below).
 
 **Eventos** and **Tarefas** share the same flow: a quick-add form at the top of the page, and a dialog for

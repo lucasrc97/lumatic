@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +35,13 @@ export default function TaskBoard({ tasks, columns, renderTask }: TaskBoardProps
               />
               <span className="truncate">{column.name}</span>
               <span className="font-normal text-muted-foreground">({columnTasks.length})</span>
-              {column.is_done && <span className="sr-only">— {t("tasks.columns.done")}</span>}
+              {/* Tasks here count as completed; make that visible so it is never a surprise. */}
+              {column.is_done && (
+                <span className="ml-auto flex shrink-0 items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden />
+                  {t("tasks.columns.done")}
+                </span>
+              )}
             </h2>
             {columnTasks.map((task) => (
               <div key={task.id}>{renderTask(task)}</div>

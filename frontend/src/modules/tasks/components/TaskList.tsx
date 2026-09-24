@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { groupTasksByDate } from "../lib/groupTasks";
@@ -8,10 +8,11 @@ interface TaskListProps {
   tasks: Task[];
   /** `yyyy-MM-dd`. */
   today: string;
+  /** Renders one task as an `<li>` (see TaskRow). */
   renderTask: (task: Task) => ReactNode;
 }
 
-/** Tasks grouped by due date: overdue, today, tomorrow, upcoming, undated, completed. */
+/** Tasks grouped by due date (overdue, today, tomorrow, upcoming, undated, completed), one per row. */
 export default function TaskList({ tasks, today, renderTask }: TaskListProps) {
   const { t } = useTranslation();
 
@@ -22,11 +23,11 @@ export default function TaskList({ tasks, today, renderTask }: TaskListProps) {
           <h2 id={`task-group-${group}`} className="text-sm font-semibold text-muted-foreground">
             {t(`tasks.groups.${group}`)} <span className="font-normal">({grouped.length})</span>
           </h2>
-          <div className="grid gap-2 lg:grid-cols-2">
+          <ul className="divide-y overflow-hidden rounded-lg border bg-card">
             {grouped.map((task) => (
-              <div key={task.id}>{renderTask(task)}</div>
+              <Fragment key={task.id}>{renderTask(task)}</Fragment>
             ))}
-          </div>
+          </ul>
         </section>
       ))}
     </div>

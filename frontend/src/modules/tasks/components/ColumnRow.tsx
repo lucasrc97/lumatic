@@ -71,7 +71,7 @@ export default function ColumnRow({
             onChange={() => onUpdate({ is_done: true })}
             aria-label={t("tasks.columns.markDone", { name: column.name })}
           />
-          <span aria-hidden>{t("tasks.columns.done")}</span>
+          <span aria-hidden>{t("tasks.columns.doneColumn")}</span>
         </label>
         <div className="flex">
           <Button

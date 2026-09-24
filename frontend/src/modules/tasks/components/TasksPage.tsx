@@ -24,6 +24,7 @@ import TaskCard from "./TaskCard";
 import TaskEditDialog from "./TaskEditDialog";
 import TaskForm from "./TaskForm";
 import TaskList from "./TaskList";
+import TaskRow from "./TaskRow";
 
 type View = "list" | "board";
 
@@ -58,21 +59,21 @@ export default function TasksPage() {
     reorderColumns.isPending ||
     deleteColumn.isPending;
 
-  function renderTask(task: Task) {
-    return (
-      <TaskCard
-        task={task}
-        columns={columns}
-        today={today}
-        disabled={updateTask.isPending && updateTask.variables?.id === task.id}
-        onMove={(columnId) => updateTask.mutate({ id: task.id, input: { column_id: columnId } })}
-        onEdit={() => {
-          updateTask.reset();
-          setEditing(task);
-        }}
-        onDelete={() => deleteTask.mutate(task.id)}
-      />
-    );
+  /** Props shared by the list row and the board card of a task. */
+  function taskProps(task: Task) {
+    return {
+      task,
+      columns,
+      today,
+      disabled: updateTask.isPending && updateTask.variables?.id === task.id,
+      onMove: (columnId: number) =>
+        updateTask.mutate({ id: task.id, input: { column_id: columnId } }),
+      onEdit: () => {
+        updateTask.reset();
+        setEditing(task);
+      },
+      onDelete: () => deleteTask.mutate(task.id),
+    };
   }
 
   return (
@@ -143,9 +144,17 @@ export default function TasksPage() {
       )}
       {isReady &&
         (view === "list" ? (
-          <TaskList tasks={tasks} today={today} renderTask={renderTask} />
+          <TaskList
+            tasks={tasks}
+            today={today}
+            renderTask={(task) => <TaskRow {...taskProps(task)} />}
+          />
         ) : (
-          <TaskBoard tasks={tasks} columns={columns} renderTask={renderTask} />
+          <TaskBoard
+            tasks={tasks}
+            columns={columns}
+            renderTask={(task) => <TaskCard {...taskProps(task)} />}
+          />
         ))}
 
       <TaskEditDialog

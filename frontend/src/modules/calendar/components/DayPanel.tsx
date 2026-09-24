@@ -18,11 +18,12 @@ interface DayPanelProps {
   items: CalendarItem[];
 }
 
-/** What is scheduled on a day; the list can be hidden with the arrow next to the date. */
+/** What is scheduled on a day; the list starts hidden and opens with the arrow by the date. */
 export default function DayPanel({ date, items }: DayPanelProps) {
   const { t } = useTranslation();
   const locale = useDateLocale();
-  const [expanded, setExpanded] = useState(true);
+  // Collapsed by default: the grid dots already show which days have items.
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <section aria-labelledby="day-panel-title" className="space-y-2 rounded-lg border p-3 sm:p-4">

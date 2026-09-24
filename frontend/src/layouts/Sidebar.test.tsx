@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import Sidebar from "./Sidebar";
 
 describe("Sidebar", () => {
-  it("links to each module and marks the current one", () => {
+  it("links to each module and the calendar and marks the current one", () => {
     render(
       <MemoryRouter initialEntries={["/tasks"]}>
         <Sidebar />
@@ -14,6 +14,8 @@ describe("Sidebar", () => {
     );
 
     expect(screen.getByRole("link", { name: "Hábitos" })).toHaveAttribute("href", "/habits");
+    expect(screen.getByRole("link", { name: "Eventos" })).toHaveAttribute("href", "/events");
+    expect(screen.getByRole("link", { name: "Calendário" })).toHaveAttribute("href", "/calendar");
     expect(screen.getByRole("link", { name: "Tarefas" })).toHaveAttribute("aria-current", "page");
   });
 
@@ -24,7 +26,7 @@ describe("Sidebar", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByRole("link", { name: "Calendário" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Lixeira" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Configurações" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "English" })).not.toBeInTheDocument();
   });

@@ -9,8 +9,8 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 | Module | Version | Description |
 |--------|---------|-------------|
 | **Hábitos** | V0 — active | Habit tracking with streak counters, weekly/monthly grid and progress bars |
-| **Tarefas** | V1 — active | Task management — list grouped by date and Kanban board view, with user-defined columns and custom fields |
-| **Eventos** | V2 | Calendar events with color categories and quick-add sidebar |
+| **Tarefas** | V1 — active | Task management — list grouped by date and Kanban board view, with user-defined columns and priority |
+| **Eventos** | V2 — active | Scheduled events with title, date, optional start/end time and description, browsed by month |
 | **Financeiro** | V3 | Income, expenses and balance cards — pie chart by category and transaction history |
 | **Ferramentas** | V4 | Pomodoro timer with current-task display |
 | **Diário** | V5 | Daily journal — date list on the left, distraction-free editor on the right |
@@ -20,13 +20,13 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 - **Columns** (Kanban) are created, renamed, recolored and reordered in the UI. Exactly one column is the
   *done* column: a task gets `completed_at` when it enters it and loses it when it leaves. Only empty columns
   can be deleted, and the done column cannot be deleted.
-- **Custom fields** (text, number, date or options list — e.g. *Priority*) apply to every task. Values are
-  stored per task as JSONB `{field_id: value}` and validated against the field type by the service. Deleting a
-  field, or removing an option, removes those values from every task.
+- **Priority** is a fixed field: none (default), low, medium or high. It colors the card's left border and tag.
 - The starting columns (*A fazer*, *Em andamento*, *Concluída*) are created by the migration; like any user
   data they are not translated.
 
-**Calendário** — unified view that aggregates events, task due dates, habit schedules and financial payment dates from all modules. It is a view, not a standalone module.
+**Calendário** — month view (any month/year) of dated items from every module: events and task due dates for
+now. Picking a day lists what is already scheduled there and lets you add an event or a task on that day.
+It is a view, not a module: it reads through each module's service and stores nothing (see below).
 
 **Lixeira (Trash)** — deleted items from every module go to the trash, where they can be restored or permanently deleted. Items are purged automatically after a retention period (default 30 days, editable in **Configurações / Settings**).
 
@@ -34,7 +34,8 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 
 ## Interface
 
-- Left sidebar with the modules; a top bar with app-wide pages (Calendário, Lixeira, Configurações)
+- Left sidebar with the modules and the Calendário; a top bar with app-wide pages (Lixeira, Configurações)
+- Lixeira groups deleted items by module
 - Theme — light / dark / system (default), chosen in Settings and saved in the browser
 - Language — Português (default) / English, chosen in Settings and saved in the browser
 - Fully responsive — works on mobile via PWA install from browser
@@ -72,6 +73,18 @@ Modules do not share database tables.
   register it in `build_trash_service`.
 - **Trade-off:** an in-process loop instead of a job scheduler — enough for a single self-hosted instance; with
   several API replicas each would run its own (idempotent) purge.
+
+### Calendar (cross-module view)
+
+- **Problem:** one calendar should show what every module has on each day, without a shared table that would
+  duplicate module data and drift out of sync.
+- **Approach:** same pattern as the trash. `calendar_view` owns no tables and never writes; it aggregates
+  modules through the `CalendarSource` contract (`calendar_view/domain/sources.py`), with one adapter per
+  module in `calendar_view/infrastructure/sources.py`. `GET /api/v1/calendar/items?from=&to=` returns the
+  merged items. Creating from the calendar calls each module's own API.
+- **Naming:** the package is `calendar_view` because `calendar` would shadow Python's standard library module.
+- **Adding a module to the calendar:** give its service a "items between two dates" query, write its adapter
+  and register it in `build_calendar_service`.
 
 ---
 
@@ -142,6 +155,7 @@ Lumatic/
 │   ├── habits/             (V0)
 │   ├── preferences/        (app-wide settings, e.g. trash retention)
 │   ├── trash/              (aggregates deleted items from every module)
+│   ├── calendar_view/      (aggregates dated items from every module; read-only)
 │   ├── tasks/              (V1)
 │   ├── events/             (V2)
 │   ├── financial/          (V3)

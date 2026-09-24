@@ -5,27 +5,43 @@ import { describe, expect, it, vi } from "vitest";
 import TaskForm from "./TaskForm";
 
 describe("TaskForm", () => {
-  it("submits the trimmed title and optional due date, then clears the form", async () => {
+  it("submits the trimmed title, due date and priority, then clears the form", async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
 
     await userEvent.type(screen.getByLabelText("Título da tarefa"), "  Pagar aluguel  ");
     await userEvent.type(screen.getByLabelText("Prazo"), "2026-09-30");
+    await userEvent.selectOptions(screen.getByLabelText("Prioridade"), "Média");
     await userEvent.click(screen.getByRole("button", { name: "Adicionar" }));
 
-    expect(onSubmit).toHaveBeenCalledWith({ title: "Pagar aluguel", due_date: "2026-09-30" });
+    expect(onSubmit).toHaveBeenCalledWith({
+      title: "Pagar aluguel",
+      due_date: "2026-09-30",
+      priority: "medium",
+    });
     expect(screen.getByLabelText("Título da tarefa")).toHaveValue("");
+    expect(screen.getByLabelText("Prioridade")).toHaveValue("none");
   });
 
-  it("sends a null due date when none is chosen and keeps input on failure", async () => {
+  it("sends defaults when only a title is given and keeps input on failure", async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error("offline"));
     render(<TaskForm onSubmit={onSubmit} isSubmitting={false} error="Falhou" />);
 
     await userEvent.type(screen.getByLabelText("Título da tarefa"), "Ligar{Enter}");
 
-    expect(onSubmit).toHaveBeenCalledWith({ title: "Ligar", due_date: null });
+    expect(onSubmit).toHaveBeenCalledWith({ title: "Ligar", due_date: null, priority: "none" });
     expect(screen.getByLabelText("Título da tarefa")).toHaveValue("Ligar");
     expect(screen.getByRole("alert")).toHaveTextContent("Falhou");
+  });
+
+  it("starts from a given due date and keeps it after submitting", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<TaskForm onSubmit={onSubmit} isSubmitting={false} initialDueDate="2026-10-02" />);
+
+    await userEvent.type(screen.getByLabelText("Título da tarefa"), "Revisar{Enter}");
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ due_date: "2026-10-02" }));
+    expect(screen.getByLabelText("Prazo")).toHaveValue("2026-10-02");
   });
 
   it("does not submit a blank title", () => {

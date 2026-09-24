@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from core.config import settings
-from tasks.domain.entities import FieldType, Task
+from tasks.domain.entities import Task, TaskPriority
 from tasks.infrastructure.repositories import SqlAlchemyTaskRepository
 
 pytestmark = [
@@ -20,6 +20,7 @@ pytestmark = [
 ]
 
 NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
+P = TaskPriority.NONE
 
 
 async def stored(repository: SqlAlchemyTaskRepository, task_id: int) -> Task:
@@ -56,20 +57,32 @@ async def test_migration_seeds_three_columns_with_one_done(session: AsyncSession
     assert len([c for c in columns if c.is_done]) == 1
 
 
-async def test_add_save_and_list_tasks_with_custom_values(session: AsyncSession) -> None:
+async def test_add_save_and_list_tasks_with_priority(session: AsyncSession) -> None:
     repository = SqlAlchemyTaskRepository(session)
     [first, *_] = await repository.list_columns()
-    field = await repository.add_field("Hours", FieldType.NUMBER, [], position=99)
 
-    undated = await repository.add("Undated", None, None, first.id, {field.id: 2.5}, None)
-    dated = await repository.add("Dated", "desc", date(2026, 9, 25), first.id, {}, None)
-    saved = await repository.save(replace(dated, title="Dated!", custom_values={field.id: 3}))
+    undated = await repository.add("Undated", None, None, first.id, TaskPriority.HIGH, None)
+    dated = await repository.add("Dated", "desc", date(2026, 9, 25), first.id, P, None)
+    saved = await repository.save(replace(dated, title="Dated!", priority=TaskPriority.LOW))
 
     assert await repository.get(undated.id) == undated
-    assert undated.custom_values == {field.id: 2.5}
-    assert saved.custom_values == {field.id: 3}
+    assert undated.priority is TaskPriority.HIGH
+    assert saved.priority is TaskPriority.LOW
     ids = [t.id for t in await repository.list_tasks()]
     assert ids.index(dated.id) < ids.index(undated.id)  # undated last
+
+
+async def test_list_due_between_filters_by_due_date(session: AsyncSession) -> None:
+    repository = SqlAlchemyTaskRepository(session)
+    [first, *_] = await repository.list_columns()
+    inside = await repository.add("In", None, date(2031, 5, 10), first.id, P, None)
+    await repository.add("Out", None, date(2031, 6, 1), first.id, P, None)
+    trashed = await repository.add("Trashed", None, date(2031, 5, 11), first.id, P, None)
+    await repository.save(replace(trashed, deleted_at=NOW))
+
+    due = await repository.list_due_between(date(2031, 5, 1), date(2031, 5, 31))
+
+    assert [t.id for t in due] == [inside.id]
 
 
 async def test_set_done_column_moves_flag_and_completion(session: AsyncSession) -> None:
@@ -77,8 +90,8 @@ async def test_set_done_column_moves_flag_and_completion(session: AsyncSession) 
     columns = await repository.list_columns()
     old_done = next(c for c in columns if c.is_done)
     new_done = next(c for c in columns if not c.is_done)
-    finished = await repository.add("Finished", None, None, old_done.id, {}, NOW)
-    open_task = await repository.add("Open", None, None, new_done.id, {}, None)
+    finished = await repository.add("Finished", None, None, old_done.id, P, NOW)
+    open_task = await repository.add("Open", None, None, new_done.id, P, None)
     later = NOW + timedelta(hours=1)
 
     await repository.set_done_column(new_done.id, later)
@@ -92,7 +105,7 @@ async def test_positions_and_column_deletion(session: AsyncSession) -> None:
     repository = SqlAlchemyTaskRepository(session)
     target = next(c for c in await repository.list_columns() if not c.is_done)
     extra = await repository.add_column("Extra", "#000000", position=99)
-    trashed = await repository.add("Trashed", None, None, extra.id, {}, None)
+    trashed = await repository.add("Trashed", None, None, extra.id, P, None)
     await repository.save(replace(trashed, deleted_at=NOW))
 
     ids = [c.id for c in await repository.list_columns()]
@@ -105,30 +118,11 @@ async def test_positions_and_column_deletion(session: AsyncSession) -> None:
     assert (await stored(repository, trashed.id)).column_id == target.id
 
 
-async def test_field_changes_clean_task_values(session: AsyncSession) -> None:
-    repository = SqlAlchemyTaskRepository(session)
-    [column, *_] = await repository.list_columns()
-    select = await repository.add_field("Priority", FieldType.SELECT, ["Low", "High"], 98)
-    notes = await repository.add_field("Notes", FieldType.TEXT, [], 99)
-    values = {select.id: "Low", notes.id: "a"}
-    low = await repository.add("Low", None, None, column.id, values, None)
-    high = await repository.add("High", None, None, column.id, {select.id: "High"}, None)
-
-    await repository.save_field(replace(select, options=("High",)))
-    await repository.delete_field(notes.id)
-
-    assert (await stored(repository, low.id)).custom_values == {}
-    assert (await stored(repository, high.id)).custom_values == {
-        select.id: "High"
-    }
-    assert await repository.get_field(notes.id) is None
-
-
 async def test_trashed_tasks_are_listed_apart_and_purged(session: AsyncSession) -> None:
     repository = SqlAlchemyTaskRepository(session)
     [column, *_] = await repository.list_columns()
-    old = await repository.add("Old", None, None, column.id, {}, None)
-    recent = await repository.add("Recent", None, None, column.id, {}, None)
+    old = await repository.add("Old", None, None, column.id, P, None)
+    recent = await repository.add("Recent", None, None, column.id, P, None)
     await repository.save(replace(old, deleted_at=NOW - timedelta(days=40)))
     await repository.save(replace(recent, deleted_at=NOW - timedelta(days=5)))
 

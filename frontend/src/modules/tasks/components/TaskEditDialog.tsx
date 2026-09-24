@@ -13,15 +13,13 @@ import { Input } from "@/shared/components/ui/input";
 import { NativeSelect } from "@/shared/components/ui/native-select";
 import { Textarea } from "@/shared/components/ui/textarea";
 
-import { fromInputValue, toInputValue } from "../lib/customValues";
-import type { CustomValue, Task, TaskColumn, TaskField, TaskUpdateInput } from "../types/task";
-import CustomFieldInput from "./CustomFieldInput";
+import type { Priority, Task, TaskColumn, TaskUpdateInput } from "../types/task";
+import PrioritySelect from "./PrioritySelect";
 
 interface TaskEditDialogProps {
   /** The task being edited; the dialog is open while set. */
   task: Task | null;
   columns: TaskColumn[];
-  fields: TaskField[];
   /** Should reject on failure; the dialog stays open and the parent shows `error`. */
   onSubmit: (input: TaskUpdateInput) => Promise<void>;
   onClose: () => void;
@@ -48,7 +46,6 @@ export default function TaskEditDialog({ task, onClose, ...props }: TaskEditDial
 function TaskEditForm({
   task,
   columns,
-  fields,
   onSubmit,
   onClose,
   isSubmitting,
@@ -59,24 +56,19 @@ function TaskEditForm({
   const [description, setDescription] = useState(task.description ?? "");
   const [dueDate, setDueDate] = useState(task.due_date ?? "");
   const [columnId, setColumnId] = useState(task.column_id);
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(fields.map((field) => [field.id, toInputValue(task.custom_values[field.id])])),
-  );
+  const [priority, setPriority] = useState<Priority>(task.priority);
   const trimmedTitle = title.trim();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!trimmedTitle) return;
-    const customValues: Record<string, CustomValue | null> = Object.fromEntries(
-      fields.map((field) => [field.id, fromInputValue(field, values[field.id] ?? "")]),
-    );
     try {
       await onSubmit({
         title: trimmedTitle,
         description: description.trim() || null,
         due_date: dueDate || null,
         column_id: columnId,
-        custom_values: customValues,
+        priority,
       });
       onClose();
     } catch {
@@ -137,19 +129,12 @@ function TaskEditForm({
             ))}
           </NativeSelect>
         </div>
-        {fields.map((field) => (
-          <div key={field.id} className="space-y-1">
-            <label htmlFor={`edit-task-field-${field.id}`} className="text-sm font-medium">
-              {field.name}
-            </label>
-            <CustomFieldInput
-              id={`edit-task-field-${field.id}`}
-              field={field}
-              value={values[field.id] ?? ""}
-              onChange={(value) => setValues((current) => ({ ...current, [field.id]: value }))}
-            />
-          </div>
-        ))}
+        <div className="space-y-1">
+          <label htmlFor="edit-task-priority" className="text-sm font-medium">
+            {t("tasks.priority.label")}
+          </label>
+          <PrioritySelect id="edit-task-priority" value={priority} onChange={setPriority} />
+        </div>
       </div>
       {error && (
         <p role="alert" className="text-sm text-destructive">

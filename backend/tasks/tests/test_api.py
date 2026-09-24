@@ -39,19 +39,16 @@ def test_null_title_is_rejected(client: TestClient) -> None:
     assert response.json()["error"]["code"] == "validation_error"
 
 
-def test_custom_values_round_trip_with_string_keys(client: TestClient) -> None:
-    field = client.post(
-        f"{BASE}/fields", json={"name": "Priority", "type": "select", "options": ["Low", "High"]}
-    ).json()
+def test_priority_is_set_and_validated(client: TestClient) -> None:
+    task = create_task(client, priority="high")
 
-    task = create_task(client, custom_values={str(field["id"]): "High"})
-    invalid = client.post(
-        f"{BASE}/tasks", json={"title": "x", "custom_values": {str(field["id"]): "Medium"}}
-    )
+    lowered = client.patch(f"{BASE}/tasks/{task['id']}", json={"priority": "low"})
+    invalid = client.patch(f"{BASE}/tasks/{task['id']}", json={"priority": "urgent"})
 
-    assert task["custom_values"] == {str(field["id"]): "High"}
+    assert task["priority"] == "high"
+    assert create_task(client)["priority"] == "none"
+    assert lowered.json()["priority"] == "low"
     assert invalid.status_code == 422
-    assert invalid.json()["error"]["code"] == "invalid_task_custom_value"
 
 
 def test_columns_crud_and_order(client: TestClient) -> None:
@@ -83,37 +80,3 @@ def test_column_rules_return_conflict_codes(client: TestClient) -> None:
     assert done.json()["error"]["code"] == "task_done_column_required"
     assert bad_order.status_code == 422
     assert bad_order.json()["error"]["code"] == "invalid_task_order"
-
-
-def test_fields_crud(client: TestClient) -> None:
-    created = client.post(f"{BASE}/fields", json={"name": "Estimate", "type": "number"})
-    assert created.status_code == 201
-    field_id = created.json()["id"]
-
-    renamed = client.patch(f"{BASE}/fields/{field_id}", json={"name": "Hours"})
-    assert renamed.json() == {
-        "id": field_id,
-        "name": "Hours",
-        "type": "number",
-        "options": [],
-        "position": 0,
-    }
-
-    assert client.delete(f"{BASE}/fields/{field_id}").status_code == 204
-    assert client.get(f"{BASE}/fields").json() == []
-    assert client.delete(f"{BASE}/fields/{field_id}").status_code == 404
-
-
-def test_invalid_field_options_return_422(client: TestClient) -> None:
-    response = client.post(f"{BASE}/fields", json={"name": "Size", "type": "select"})
-
-    assert response.status_code == 422
-    assert response.json()["error"]["code"] == "invalid_task_field_options"
-
-
-def test_field_type_cannot_change(client: TestClient) -> None:
-    field_id = client.post(f"{BASE}/fields", json={"name": "Notes", "type": "text"}).json()["id"]
-
-    response = client.patch(f"{BASE}/fields/{field_id}", json={"type": "number"})
-
-    assert response.status_code == 422

@@ -9,9 +9,6 @@ from tasks.application.dtos import (
     ColumnCreate,
     ColumnRead,
     ColumnUpdate,
-    FieldCreate,
-    FieldRead,
-    FieldUpdate,
     OrderUpdate,
     TaskCreate,
     TaskRead,
@@ -80,32 +77,3 @@ async def update_column(service: ServiceDep, column_id: int, data: ColumnUpdate)
 @router.delete("/columns/{column_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_column(service: ServiceDep, column_id: int) -> None:
     await service.delete_column(column_id, datetime.now(UTC))
-
-
-# Fields
-
-
-@router.get("/fields", response_model=list[FieldRead])
-async def list_fields(service: ServiceDep) -> list[FieldRead]:
-    return await service.list_fields()
-
-
-@router.post("/fields", response_model=FieldRead, status_code=status.HTTP_201_CREATED)
-async def create_field(service: ServiceDep, data: FieldCreate) -> FieldRead:
-    return await service.create_field(data)
-
-
-@router.put("/fields/order", response_model=list[FieldRead])
-async def reorder_fields(service: ServiceDep, data: OrderUpdate) -> list[FieldRead]:
-    return await service.reorder_fields(data.ids)
-
-
-@router.patch("/fields/{field_id}", response_model=FieldRead)
-async def update_field(service: ServiceDep, field_id: int, data: FieldUpdate) -> FieldRead:
-    return await service.update_field(field_id, data)
-
-
-@router.delete("/fields/{field_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_field(service: ServiceDep, field_id: int) -> None:
-    """Deletes the field and its value in every task."""
-    await service.delete_field(field_id)

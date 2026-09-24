@@ -4,6 +4,7 @@
     "global": "Menu global",
     "habits": "Hábitos",
     "tasks": "Tarefas",
+    "events": "Eventos",
     "calendar": "Calendário",
     "openMenu": "Abrir menu",
     "menu": "Menu",
@@ -41,16 +42,54 @@
     "trash_module_not_found": "Este tipo de item não pode ser restaurado da lixeira.",
     "task_not_found": "Tarefa não encontrada.",
     "task_column_not_found": "Coluna não encontrada.",
-    "task_field_not_found": "Campo não encontrado.",
     "task_column_not_empty": "Esta coluna ainda tem tarefas. Mova-as para outra coluna antes de excluí-la.",
     "task_done_column_required": "Sempre deve existir uma coluna de concluídas. Marque outra coluna como concluídas antes.",
-    "invalid_task_custom_value": "Um dos campos tem um valor inválido.",
-    "unknown_task_field": "Um dos campos não existe mais. Recarregue a página.",
     "invalid_task_order": "A ordem mudou em outro lugar. Recarregue a página.",
-    "invalid_task_field_options": "Uma lista de opções precisa de 1 a 50 opções diferentes, com até 50 caracteres cada."
+    "event_not_found": "Evento não encontrado.",
+    "invalid_event_time": "Horário inválido: o fim precisa de um início e não pode ser antes dele."
+  },
+  "month": {
+    "previous": "Mês anterior",
+    "next": "Próximo mês",
+    "month": "Mês",
+    "year": "Ano",
+    "today": "Hoje"
   },
   "calendar": {
-    "placeholder": "Os itens de cada módulo aparecerão aqui conforme forem implementados."
+    "title": "Calendário",
+    "dayLabel_zero": "{{date}}, nada marcado",
+    "dayLabel_one": "{{date}}, {{count}} item",
+    "dayLabel_other": "{{date}}, {{count}} itens",
+    "more": "+{{count}}",
+    "dayEmpty": "Nada marcado neste dia.",
+    "due": "Prazo",
+    "newEvent": "Novo evento",
+    "newTask": "Nova tarefa"
+  },
+  "events": {
+    "title": "Eventos",
+    "new": "Novo evento",
+    "edit": "Editar evento",
+    "empty": "Nenhum evento neste mês.",
+    "allDay": "Dia inteiro",
+    "editLabel": "Editar {{title}}",
+    "deleteLabel": "Excluir {{title}}",
+    "deleteTitle": "Excluir evento?",
+    "deleteDescription": "“{{title}}” irá para a lixeira. Você pode restaurá-lo até que seja excluído de vez.",
+    "delete": "Excluir",
+    "form": {
+      "titleLabel": "Título do evento",
+      "titlePlaceholder": "Ex.: Consulta médica",
+      "date": "Data",
+      "start": "Início",
+      "end": "Fim",
+      "allDayHint": "Sem horário, o evento vale para o dia inteiro.",
+      "endNeedsStart": "Informe o início para usar um horário de fim.",
+      "endBeforeStart": "O fim não pode ser antes do início.",
+      "description": "Descrição",
+      "create": "Adicionar evento",
+      "save": "Salvar"
+    }
   },
   "habits": {
     "title": "Hábitos",
@@ -107,7 +146,8 @@
     "purgesIn_other": "excluído de vez em {{count}} dias",
     "modules": {
       "habits": "Hábito",
-      "tasks": "Tarefa"
+      "tasks": "Tarefa",
+      "events": "Evento"
     }
   },
   "tasks": {
@@ -164,31 +204,12 @@
       "deleteDescription": "A coluna “{{name}}” será excluída.",
       "delete": "Excluir"
     },
-    "fields": {
-      "manage": "Campos",
-      "title": "Gerenciar campos",
-      "description": "Campos extras que toda tarefa pode preencher, como Prioridade.",
-      "empty": "Nenhum campo ainda.",
-      "nameLabel": "Nome do campo",
-      "namePlaceholder": "Novo campo",
-      "typeLabel": "Tipo do campo",
-      "optionsLabel": "Opções",
-      "optionsPlaceholder": "Baixa, Média, Alta",
-      "optionsHint": "Separe as opções por vírgula.",
-      "renameLabel": "Nome do campo {{name}}",
-      "optionsOf": "Opções de {{name}}",
-      "moveUp": "Mover {{name}} para cima",
-      "moveDown": "Mover {{name}} para baixo",
-      "deleteLabel": "Excluir campo {{name}}",
-      "deleteTitle": "Excluir campo?",
-      "deleteDescription": "O campo “{{name}}” e o valor dele em todas as tarefas serão excluídos. Esta ação não pode ser desfeita.",
-      "delete": "Excluir",
-      "types": {
-        "text": "Texto",
-        "number": "Número",
-        "date": "Data",
-        "select": "Lista de opções"
-      }
+    "priority": {
+      "label": "Prioridade",
+      "none": "Sem prioridade",
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta"
     }
   },
   "settings": {

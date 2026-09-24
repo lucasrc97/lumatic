@@ -5,24 +5,20 @@ import pytest
 from tasks.application.dtos import (
     ColumnCreate,
     ColumnUpdate,
-    FieldCreate,
-    FieldUpdate,
     TaskCreate,
     TaskUpdate,
 )
 from tasks.application.services import TaskService
-from tasks.domain.entities import FieldType
+from tasks.domain.entities import TaskPriority
 from tasks.domain.exceptions import (
     DoneColumnRequiredError,
-    InvalidCustomValueError,
-    InvalidFieldOptionsError,
+    InvalidDateRangeError,
     InvalidOrderError,
     TaskColumnNotEmptyError,
     TaskColumnNotFoundError,
     TaskNotFoundError,
-    UnknownCustomFieldError,
 )
-from tasks.tests.conftest import DOING, DONE, TODO, InMemoryTaskRepository
+from tasks.tests.conftest import DOING, DONE, TODO
 
 NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
 LATER = NOW + timedelta(hours=1)
@@ -89,25 +85,29 @@ async def test_unknown_column_is_rejected(service: TaskService) -> None:
         await service.create_task(TaskCreate(title="x", column_id=999), NOW)
 
 
-async def test_custom_values_are_validated_and_merged(service: TaskService) -> None:
-    priority = await service.create_field(
-        FieldCreate(name="Priority", type=FieldType.SELECT, options=["Low", "High"])
-    )
-    estimate = await service.create_field(FieldCreate(name="Hours", type=FieldType.NUMBER))
-    task = await service.create_task(
-        TaskCreate(title="Plan", custom_values={priority.id: "High", estimate.id: 2}), NOW
-    )
+async def test_priority_defaults_to_none_and_can_be_changed(service: TaskService) -> None:
+    task = await service.create_task(TaskCreate(title="Plan"), NOW)
 
-    updated = await service.update_task(
-        task.id, TaskUpdate(custom_values={estimate.id: None}), NOW
-    )
+    urgent = await service.update_task(task.id, TaskUpdate(priority=TaskPriority.HIGH), NOW)
+    renamed = await service.update_task(task.id, TaskUpdate(title="Plan trip"), NOW)
 
-    assert task.custom_values == {priority.id: "High", estimate.id: 2}
-    assert updated.custom_values == {priority.id: "High"}
-    with pytest.raises(InvalidCustomValueError):
-        await service.update_task(task.id, TaskUpdate(custom_values={priority.id: "Medium"}), NOW)
-    with pytest.raises(UnknownCustomFieldError):
-        await service.update_task(task.id, TaskUpdate(custom_values={999: "x"}), NOW)
+    assert task.priority is TaskPriority.NONE
+    assert urgent.priority is TaskPriority.HIGH
+    assert renamed.priority is TaskPriority.HIGH
+
+
+async def test_list_due_between_returns_active_tasks_in_range(service: TaskService) -> None:
+    inside = await service.create_task(TaskCreate(title="A", due_date=date(2026, 9, 25)), NOW)
+    await service.create_task(TaskCreate(title="Undated"), NOW)
+    await service.create_task(TaskCreate(title="Later", due_date=date(2026, 11, 1)), NOW)
+    trashed = await service.create_task(TaskCreate(title="T", due_date=date(2026, 9, 26)), NOW)
+    await service.delete_task(trashed.id, NOW)
+
+    due = await service.list_due_between(date(2026, 9, 1), date(2026, 9, 30))
+
+    assert [t.id for t in due] == [inside.id]
+    with pytest.raises(InvalidDateRangeError):
+        await service.list_due_between(date(2026, 9, 30), date(2026, 9, 1))
 
 
 async def test_deleted_task_goes_to_trash_and_can_be_restored(service: TaskService) -> None:
@@ -219,61 +219,3 @@ async def test_deleting_a_column_keeps_its_trashed_tasks_restorable(
     assert [c.id for c in await service.list_columns()] == [TODO, DONE]
     [restored] = await service.list_tasks()
     assert restored.column_id == TODO
-
-
-# Fields
-
-
-async def test_fields_are_created_in_order_and_validated(service: TaskService) -> None:
-    text = await service.create_field(FieldCreate(name="Notes", type=FieldType.TEXT))
-    select = await service.create_field(
-        FieldCreate(name="Priority", type=FieldType.SELECT, options=["Low", "High"])
-    )
-
-    assert [f.id for f in await service.list_fields()] == [text.id, select.id]
-    assert select.options == ["Low", "High"]
-    with pytest.raises(InvalidFieldOptionsError):
-        await service.create_field(FieldCreate(name="Empty", type=FieldType.SELECT))
-
-
-async def test_removing_an_option_clears_it_from_tasks(service: TaskService) -> None:
-    priority = await service.create_field(
-        FieldCreate(name="Priority", type=FieldType.SELECT, options=["Low", "High"])
-    )
-    low = await service.create_task(TaskCreate(title="A", custom_values={priority.id: "Low"}), NOW)
-    high = await service.create_task(
-        TaskCreate(title="B", custom_values={priority.id: "High"}), NOW
-    )
-
-    renamed = await service.update_field(
-        priority.id, FieldUpdate(name="Urgency", options=["High", "Urgent"])
-    )
-
-    assert (renamed.name, renamed.options) == ("Urgency", ["High", "Urgent"])
-    tasks = {t.id: t for t in await service.list_tasks()}
-    assert tasks[low.id].custom_values == {}
-    assert tasks[high.id].custom_values == {priority.id: "High"}
-
-
-async def test_deleting_a_field_removes_its_values_even_from_trashed_tasks(
-    service: TaskService, repository: InMemoryTaskRepository
-) -> None:
-    notes = await service.create_field(FieldCreate(name="Notes", type=FieldType.TEXT))
-    task = await service.create_task(TaskCreate(title="A", custom_values={notes.id: "x"}), NOW)
-    await service.delete_task(task.id, NOW)
-
-    await service.delete_field(notes.id)
-
-    assert await service.list_fields() == []
-    assert repository.tasks[task.id].custom_values == {}
-
-
-async def test_reorder_fields(service: TaskService) -> None:
-    first = await service.create_field(FieldCreate(name="A", type=FieldType.TEXT))
-    second = await service.create_field(FieldCreate(name="B", type=FieldType.TEXT))
-
-    reordered = await service.reorder_fields([second.id, first.id])
-
-    assert [f.id for f in reordered] == [second.id, first.id]
-    with pytest.raises(InvalidOrderError):
-        await service.reorder_fields([first.id])

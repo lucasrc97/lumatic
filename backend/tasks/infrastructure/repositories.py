@@ -1,12 +1,11 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Any
 
-from sqlalchemy import String, delete, func, literal, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tasks.domain.entities import CustomValue, FieldType, Task, TaskColumn, TaskField
-from tasks.infrastructure.persistence import TaskColumnModel, TaskFieldModel, TaskModel
+from tasks.domain.entities import Task, TaskColumn, TaskPriority
+from tasks.infrastructure.persistence import TaskColumnModel, TaskModel
 
 
 def _column_to_entity(model: TaskColumnModel) -> TaskColumn:
@@ -19,16 +18,6 @@ def _column_to_entity(model: TaskColumnModel) -> TaskColumn:
     )
 
 
-def _field_to_entity(model: TaskFieldModel) -> TaskField:
-    return TaskField(
-        id=model.id,
-        name=model.name,
-        type=FieldType(model.type),
-        position=model.position,
-        options=tuple(model.options),
-    )
-
-
 def _task_to_entity(model: TaskModel) -> Task:
     return Task(
         id=model.id,
@@ -37,19 +26,10 @@ def _task_to_entity(model: TaskModel) -> Task:
         due_date=model.due_date,
         column_id=model.column_id,
         created_at=model.created_at,
+        priority=TaskPriority(model.priority),
         completed_at=model.completed_at,
         deleted_at=model.deleted_at,
-        custom_values={int(key): value for key, value in model.custom_values.items()},
     )
-
-
-def _to_json_values(values: Mapping[int, CustomValue]) -> dict[str, Any]:
-    return {str(key): value for key, value in values.items()}
-
-
-def _without_field(field_id: int) -> Any:
-    """`custom_values - '<field id>'`: the task's values without that field."""
-    return TaskModel.custom_values.op("-")(literal(str(field_id), String))
 
 
 class SqlAlchemyTaskRepository:
@@ -132,66 +112,6 @@ class SqlAlchemyTaskRepository:
         await self._session.execute(delete(TaskColumnModel).where(TaskColumnModel.id == column_id))
         await self._session.commit()
 
-    # Fields
-
-    async def list_fields(self) -> list[TaskField]:
-        result = await self._session.scalars(
-            select(TaskFieldModel).order_by(TaskFieldModel.position, TaskFieldModel.id)
-        )
-        return [_field_to_entity(model) for model in result]
-
-    async def get_field(self, field_id: int) -> TaskField | None:
-        model = await self._session.get(TaskFieldModel, field_id)
-        return _field_to_entity(model) if model is not None else None
-
-    async def add_field(
-        self, name: str, type_: FieldType, options: Sequence[str], position: int
-    ) -> TaskField:
-        model = TaskFieldModel(
-            name=name, type=type_.value, options=list(options), position=position
-        )
-        self._session.add(model)
-        await self._session.commit()
-        await self._session.refresh(model)
-        return _field_to_entity(model)
-
-    async def save_field(self, field: TaskField) -> TaskField:
-        model = await self._session.get_one(TaskFieldModel, field.id)
-        model.name = field.name
-        model.options = list(field.options)
-        if field.type is FieldType.SELECT:
-            key = str(field.id)
-            await self._session.execute(
-                update(TaskModel)
-                .where(
-                    TaskModel.custom_values.has_key(key),
-                    TaskModel.custom_values[key].astext.not_in(field.options),
-                )
-                .values(custom_values=_without_field(field.id)),
-                execution_options={"synchronize_session": "fetch"},
-            )
-        await self._session.commit()
-        return _field_to_entity(model)
-
-    async def set_field_positions(self, field_ids: Sequence[int]) -> None:
-        for position, field_id in enumerate(field_ids):
-            await self._session.execute(
-                update(TaskFieldModel)
-                .where(TaskFieldModel.id == field_id)
-                .values(position=position)
-            )
-        await self._session.commit()
-
-    async def delete_field(self, field_id: int) -> None:
-        await self._session.execute(
-            update(TaskModel)
-            .where(TaskModel.custom_values.has_key(str(field_id)))
-            .values(custom_values=_without_field(field_id)),
-            execution_options={"synchronize_session": "fetch"},
-        )
-        await self._session.execute(delete(TaskFieldModel).where(TaskFieldModel.id == field_id))
-        await self._session.commit()
-
     # Tasks
 
     async def list_tasks(self) -> list[Task]:
@@ -201,6 +121,18 @@ class SqlAlchemyTaskRepository:
             .order_by(
                 TaskModel.due_date.asc().nulls_last(), TaskModel.created_at, TaskModel.id
             )
+        )
+        return [_task_to_entity(model) for model in result]
+
+    async def list_due_between(self, start: date, end: date) -> list[Task]:
+        result = await self._session.scalars(
+            select(TaskModel)
+            .where(
+                TaskModel.deleted_at.is_(None),
+                TaskModel.due_date >= start,
+                TaskModel.due_date <= end,
+            )
+            .order_by(TaskModel.due_date, TaskModel.created_at, TaskModel.id)
         )
         return [_task_to_entity(model) for model in result]
 
@@ -220,7 +152,7 @@ class SqlAlchemyTaskRepository:
         description: str | None,
         due_date: date | None,
         column_id: int,
-        custom_values: Mapping[int, CustomValue],
+        priority: TaskPriority,
         completed_at: datetime | None,
     ) -> Task:
         model = TaskModel(
@@ -228,7 +160,7 @@ class SqlAlchemyTaskRepository:
             description=description,
             due_date=due_date,
             column_id=column_id,
-            custom_values=_to_json_values(custom_values),
+            priority=priority.value,
             completed_at=completed_at,
         )
         self._session.add(model)
@@ -242,7 +174,7 @@ class SqlAlchemyTaskRepository:
         model.description = task.description
         model.due_date = task.due_date
         model.column_id = task.column_id
-        model.custom_values = _to_json_values(task.custom_values)
+        model.priority = task.priority.value
         model.completed_at = task.completed_at
         model.deleted_at = task.deleted_at
         await self._session.commit()

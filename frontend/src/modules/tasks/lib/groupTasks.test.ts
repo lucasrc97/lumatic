@@ -10,7 +10,7 @@ function task(id: number, due_date: string | null, completed_at: string | null =
     description: null,
     due_date,
     column_id: 1,
-    custom_values: {},
+    priority: "none",
     completed_at,
     created_at: "2026-09-01T00:00:00Z",
   };

@@ -12,6 +12,7 @@ import type { TrashItem } from "../types/trash";
 const MODULE_LABEL_KEYS = {
   habits: "trash.modules.habits",
   tasks: "trash.modules.tasks",
+  events: "trash.modules.events",
 } as const;
 
 function isKnownModule(module: string): module is keyof typeof MODULE_LABEL_KEYS {

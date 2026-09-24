@@ -1,8 +1,8 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Protocol
 
-from tasks.domain.entities import CustomValue, FieldType, Task, TaskColumn, TaskField
+from tasks.domain.entities import Task, TaskColumn, TaskPriority
 
 
 class TaskRepository(Protocol):
@@ -39,38 +39,14 @@ class TaskRepository(Protocol):
         """Atomically move the column's remaining tasks (setting `completed_at`) and delete it."""
         ...
 
-    # Fields
-
-    async def list_fields(self) -> list[TaskField]:
-        """All fields ordered by position."""
-        ...
-
-    async def get_field(self, field_id: int) -> TaskField | None: ...
-
-    async def add_field(
-        self, name: str, type_: FieldType, options: Sequence[str], position: int
-    ) -> TaskField: ...
-
-    async def save_field(self, field: TaskField) -> TaskField:
-        """Saves name and options; the type never changes.
-
-        For select fields, task values that are no longer an option are removed in the same
-        transaction.
-        """
-        ...
-
-    async def set_field_positions(self, field_ids: Sequence[int]) -> None:
-        """Order fields as listed; every field id must be present."""
-        ...
-
-    async def delete_field(self, field_id: int) -> None:
-        """Delete a field and its value in every task, trashed ones included."""
-        ...
-
     # Tasks
 
     async def list_tasks(self) -> list[Task]:
         """Tasks that are not in the trash, by due date (undated last), then creation."""
+        ...
+
+    async def list_due_between(self, start: date, end: date) -> list[Task]:
+        """Tasks not in the trash due within [start, end], by due date then creation."""
         ...
 
     async def list_in_column(self, column_id: int) -> list[Task]:
@@ -87,7 +63,7 @@ class TaskRepository(Protocol):
         description: str | None,
         due_date: date | None,
         column_id: int,
-        custom_values: Mapping[int, CustomValue],
+        priority: TaskPriority,
         completed_at: datetime | None,
     ) -> Task: ...
 

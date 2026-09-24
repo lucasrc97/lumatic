@@ -1,4 +1,4 @@
-from collections.abc import Callable, Iterator, Mapping, Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import replace
 from datetime import UTC, date, datetime
 
@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from tasks.api.routes import get_task_service
 from tasks.application.services import TaskService
-from tasks.domain.entities import CustomValue, FieldType, Task, TaskColumn, TaskField
+from tasks.domain.entities import Task, TaskColumn, TaskPriority
 
 # Same starting columns as the 0004 migration.
 TODO, DOING, DONE = 1, 2, 3
@@ -23,7 +23,6 @@ class InMemoryTaskRepository:
             DOING: TaskColumn(DOING, "Em andamento", "#3b82f6", 1, False),
             DONE: TaskColumn(DONE, "Concluída", "#22c55e", 2, True),
         }
-        self.fields: dict[int, TaskField] = {}
         self.tasks: dict[int, Task] = {}
         self._next_id = 100
 
@@ -70,42 +69,6 @@ class InMemoryTaskRepository:
                 )
         del self.columns[column_id]
 
-    # Fields
-
-    async def list_fields(self) -> list[TaskField]:
-        return sorted(self.fields.values(), key=lambda f: (f.position, f.id))
-
-    async def get_field(self, field_id: int) -> TaskField | None:
-        return self.fields.get(field_id)
-
-    async def add_field(
-        self, name: str, type_: FieldType, options: Sequence[str], position: int
-    ) -> TaskField:
-        field = TaskField(self._new_id(), name, type_, position, tuple(options))
-        self.fields[field.id] = field
-        return field
-
-    async def save_field(self, field: TaskField) -> TaskField:
-        stored = self.fields[field.id]
-        self.fields[field.id] = replace(stored, name=field.name, options=field.options)
-        if field.type is FieldType.SELECT:
-            self._drop_values(field.id, keep=lambda value: value in field.options)
-        return self.fields[field.id]
-
-    async def set_field_positions(self, field_ids: Sequence[int]) -> None:
-        for position, field_id in enumerate(field_ids):
-            self.fields[field_id] = replace(self.fields[field_id], position=position)
-
-    async def delete_field(self, field_id: int) -> None:
-        self._drop_values(field_id, keep=lambda _: False)
-        del self.fields[field_id]
-
-    def _drop_values(self, field_id: int, keep: Callable[[CustomValue], bool]) -> None:
-        for task in list(self.tasks.values()):
-            if field_id in task.custom_values and not keep(task.custom_values[field_id]):
-                values = {k: v for k, v in task.custom_values.items() if k != field_id}
-                self.tasks[task.id] = replace(task, custom_values=values)
-
     # Tasks
 
     async def list_tasks(self) -> list[Task]:
@@ -113,6 +76,13 @@ class InMemoryTaskRepository:
         return sorted(
             active, key=lambda t: (t.due_date is None, t.due_date or date.min, t.created_at, t.id)
         )
+
+    async def list_due_between(self, start: date, end: date) -> list[Task]:
+        return [
+            t
+            for t in await self.list_tasks()
+            if t.due_date is not None and start <= t.due_date <= end
+        ]
 
     async def list_in_column(self, column_id: int) -> list[Task]:
         return [t for t in self.tasks.values() if t.column_id == column_id]
@@ -126,7 +96,7 @@ class InMemoryTaskRepository:
         description: str | None,
         due_date: date | None,
         column_id: int,
-        custom_values: Mapping[int, CustomValue],
+        priority: TaskPriority,
         completed_at: datetime | None,
     ) -> Task:
         task = Task(
@@ -136,8 +106,8 @@ class InMemoryTaskRepository:
             due_date=due_date,
             column_id=column_id,
             created_at=datetime(2026, 1, 1, tzinfo=UTC),
+            priority=priority,
             completed_at=completed_at,
-            custom_values=dict(custom_values),
         )
         self.tasks[task.id] = task
         return task

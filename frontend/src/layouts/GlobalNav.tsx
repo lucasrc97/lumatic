@@ -1,4 +1,4 @@
-import { CalendarDays, Settings, Trash2 } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
@@ -6,7 +6,6 @@ import { cn } from "@/shared/lib/utils";
 
 /** App-wide pages (not modules), shown as icon links in the top bar. */
 const GLOBAL_ITEMS = [
-  { to: "/calendar", labelKey: "nav.calendar", icon: CalendarDays },
   { to: "/trash", labelKey: "nav.trash", icon: Trash2 },
   { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;

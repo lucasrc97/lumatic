@@ -7,6 +7,8 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from events.application.services import EventService
+from events.infrastructure.repositories import SqlAlchemyEventRepository
 from habits.application.services import HabitService
 from habits.infrastructure.repositories import SqlAlchemyHabitRepository
 from preferences.application.services import PreferencesService
@@ -61,11 +63,34 @@ class TaskTrashSource:
         return await self._service.purge_trashed_before(cutoff)
 
 
+class EventTrashSource:
+    module = "events"
+
+    def __init__(self, service: EventService) -> None:
+        self._service = service
+
+    async def list_items(self) -> list[TrashItem]:
+        return [
+            TrashItem(module=self.module, item_id=e.id, title=e.title, deleted_at=e.deleted_at)
+            for e in await self._service.list_trashed()
+        ]
+
+    async def restore(self, item_id: int) -> None:
+        await self._service.restore_event(item_id)
+
+    async def purge(self, item_id: int) -> None:
+        await self._service.purge_event(item_id)
+
+    async def purge_deleted_before(self, cutoff: datetime) -> int:
+        return await self._service.purge_trashed_before(cutoff)
+
+
 def build_trash_service(session: AsyncSession) -> TrashService:
     return TrashService(
         sources=[
             HabitTrashSource(HabitService(SqlAlchemyHabitRepository(session))),
             TaskTrashSource(TaskService(SqlAlchemyTaskRepository(session))),
+            EventTrashSource(EventService(SqlAlchemyEventRepository(session))),
         ],
         preferences=PreferencesService(SqlAlchemyPreferencesRepository(session)),
     )

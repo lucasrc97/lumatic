@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppLayout from "@/layouts/AppLayout";
-import CalendarView from "@/layouts/CalendarView";
+import CalendarPage from "@/modules/calendar/components/CalendarPage";
+import EventsPage from "@/modules/events/components/EventsPage";
 import HabitsPage from "@/modules/habits/components/HabitsPage";
 import SettingsPage from "@/modules/preferences/components/SettingsPage";
 import TasksPage from "@/modules/tasks/components/TasksPage";
@@ -14,7 +15,8 @@ export default function App() {
         <Route index element={<Navigate to="/habits" replace />} />
         <Route path="habits" element={<HabitsPage />} />
         <Route path="tasks" element={<TasksPage />} />
-        <Route path="calendar" element={<CalendarView />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="calendar" element={<CalendarPage />} />
         <Route path="trash" element={<TrashPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/habits" replace />} />

@@ -1,39 +1,28 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import replace
-from datetime import datetime
+from datetime import date, datetime
 
 from tasks.application.dtos import (
     ColumnCreate,
     ColumnRead,
     ColumnUpdate,
-    CustomValueInput,
-    FieldCreate,
-    FieldRead,
-    FieldUpdate,
     TaskCreate,
     TaskRead,
     TaskUpdate,
     TrashedTask,
 )
-from tasks.domain.entities import (
-    CustomValue,
-    Task,
-    TaskColumn,
-    TaskField,
-    completed_at_for,
-    normalize_options,
-    validate_custom_value,
-)
+from tasks.domain.entities import Task, TaskColumn, completed_at_for
 from tasks.domain.exceptions import (
     DoneColumnRequiredError,
+    InvalidDateRangeError,
     InvalidOrderError,
     TaskColumnNotEmptyError,
     TaskColumnNotFoundError,
-    TaskFieldNotFoundError,
     TaskNotFoundError,
-    UnknownCustomFieldError,
 )
 from tasks.domain.repositories import TaskRepository
+
+MAX_RANGE_DAYS = 366
 
 
 class TaskService:
@@ -45,6 +34,17 @@ class TaskService:
     async def list_tasks(self) -> list[TaskRead]:
         return [TaskRead.from_entity(task) for task in await self._repository.list_tasks()]
 
+    async def list_due_between(self, start: date, end: date) -> list[TaskRead]:
+        """Active tasks due within [start, end]; used by the calendar view."""
+        if start > end:
+            raise InvalidDateRangeError("'from' must be on or before 'to'.")
+        if (end - start).days >= MAX_RANGE_DAYS:
+            raise InvalidDateRangeError(f"Date range cannot exceed {MAX_RANGE_DAYS} days.")
+        return [
+            TaskRead.from_entity(task)
+            for task in await self._repository.list_due_between(start, end)
+        ]
+
     async def create_task(self, data: TaskCreate, now: datetime) -> TaskRead:
         column = await self._column_for_new_task(data.column_id)
         task = await self._repository.add(
@@ -52,7 +52,7 @@ class TaskService:
             description=data.description,
             due_date=data.due_date,
             column_id=column.id,
-            custom_values=await self._merge_custom_values({}, data.custom_values),
+            priority=data.priority,
             completed_at=completed_at_for(column, None, now),
         )
         return TaskRead.from_entity(task)
@@ -65,6 +65,7 @@ class TaskService:
             title=data.title if data.title is not None else task.title,
             description=data.description if "description" in provided else task.description,
             due_date=data.due_date if "due_date" in provided else task.due_date,
+            priority=data.priority if data.priority is not None else task.priority,
         )
         if data.column_id is not None and data.column_id != task.column_id:
             column = await self._get_column(data.column_id)
@@ -72,13 +73,6 @@ class TaskService:
                 updated,
                 column_id=column.id,
                 completed_at=completed_at_for(column, task.completed_at, now),
-            )
-        if data.custom_values is not None:
-            updated = replace(
-                updated,
-                custom_values=await self._merge_custom_values(
-                    task.custom_values, data.custom_values
-                ),
             )
         if updated == task:
             return TaskRead.from_entity(task)
@@ -132,7 +126,9 @@ class TaskService:
 
     async def reorder_columns(self, column_ids: Sequence[int]) -> list[ColumnRead]:
         columns = await self._repository.list_columns()
-        _check_order(column_ids, [c.id for c in columns])
+        existing = [c.id for c in columns]
+        if len(column_ids) != len(existing) or set(column_ids) != set(existing):
+            raise InvalidOrderError()
         await self._repository.set_column_positions(column_ids)
         return await self.list_columns()
 
@@ -155,59 +151,7 @@ class TaskService:
             completed_at=completed_at_for(fallback, None, now),
         )
 
-    # Fields
-
-    async def list_fields(self) -> list[FieldRead]:
-        return [FieldRead.from_entity(f) for f in await self._repository.list_fields()]
-
-    async def create_field(self, data: FieldCreate) -> FieldRead:
-        options = normalize_options(data.type, data.options)
-        fields = await self._repository.list_fields()
-        position = max((f.position for f in fields), default=-1) + 1
-        field = await self._repository.add_field(data.name, data.type, options, position)
-        return FieldRead.from_entity(field)
-
-    async def update_field(self, field_id: int, data: FieldUpdate) -> FieldRead:
-        field = await self._get_field(field_id)
-        if data.name is not None:
-            field = replace(field, name=data.name)
-        if data.options is not None:
-            field = replace(field, options=normalize_options(field.type, data.options))
-        saved = await self._repository.save_field(field)
-        return FieldRead.from_entity(saved)
-
-    async def reorder_fields(self, field_ids: Sequence[int]) -> list[FieldRead]:
-        fields = await self._repository.list_fields()
-        _check_order(field_ids, [f.id for f in fields])
-        await self._repository.set_field_positions(field_ids)
-        return await self.list_fields()
-
-    async def delete_field(self, field_id: int) -> None:
-        """Delete a field and its value in every task."""
-        await self._get_field(field_id)
-        await self._repository.delete_field(field_id)
-
     # Helpers
-
-    async def _merge_custom_values(
-        self,
-        current: Mapping[int, CustomValue],
-        updates: Mapping[int, CustomValueInput],
-    ) -> dict[int, CustomValue]:
-        if not updates:
-            return dict(current)
-        fields = {f.id: f for f in await self._repository.list_fields()}
-        merged = dict(current)
-        for field_id, raw in updates.items():
-            field = fields.get(field_id)
-            if field is None:
-                raise UnknownCustomFieldError(field_id)
-            value = validate_custom_value(field, raw)
-            if value is None:
-                merged.pop(field_id, None)
-            else:
-                merged[field_id] = value
-        return merged
 
     async def _column_for_new_task(self, column_id: int | None) -> TaskColumn:
         if column_id is not None:
@@ -221,12 +165,6 @@ class TaskService:
             raise TaskColumnNotFoundError(column_id)
         return column
 
-    async def _get_field(self, field_id: int) -> TaskField:
-        field = await self._repository.get_field(field_id)
-        if field is None:
-            raise TaskFieldNotFoundError(field_id)
-        return field
-
     async def _get_task(self, task_id: int) -> Task:
         """A task that is not in the trash; trashed tasks behave as if they do not exist."""
         task = await self._repository.get(task_id)
@@ -239,8 +177,3 @@ class TaskService:
         if task is None or task.deleted_at is None:
             raise TaskNotFoundError(task_id)
         return task
-
-
-def _check_order(ordered_ids: Sequence[int], existing_ids: Sequence[int]) -> None:
-    if len(ordered_ids) != len(existing_ids) or set(ordered_ids) != set(existing_ids):
-        raise InvalidOrderError()

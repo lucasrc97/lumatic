@@ -7,7 +7,19 @@ import { Button } from "@/shared/components/ui/button";
 import { getErrorMessage } from "@/shared/lib/apiClient";
 
 import { useEmptyTrash, usePurgeTrashItem, useRestoreTrashItem, useTrash } from "../hooks/useTrash";
+import { groupByModule } from "../lib/groupByModule";
 import TrashItemRow from "./TrashItemRow";
+
+/** Section heading for each module (its menu name); unknown modules show their raw name. */
+const SECTION_LABEL_KEYS = {
+  habits: "nav.habits",
+  tasks: "nav.tasks",
+  events: "nav.events",
+} as const;
+
+function isKnownSection(module: string): module is keyof typeof SECTION_LABEL_KEYS {
+  return Object.hasOwn(SECTION_LABEL_KEYS, module);
+}
 
 export default function TrashPage() {
   const { t } = useTranslation();
@@ -62,18 +74,26 @@ export default function TrashPage() {
         <p className="text-sm text-muted-foreground">{t("trash.empty")}</p>
       )}
 
-      <ul className="space-y-2">
-        {trashQuery.data?.map((item) => (
-          <TrashItemRow
-            key={`${item.module}-${item.id}`}
-            item={item}
-            now={now}
-            disabled={isBusy}
-            onRestore={() => restoreItem.mutate(item)}
-            onPurge={() => purgeItem.mutate(item)}
-          />
-        ))}
-      </ul>
+      {groupByModule(trashQuery.data ?? []).map(({ module, items }) => (
+        <section key={module} aria-labelledby={`trash-${module}`} className="space-y-2">
+          <h2 id={`trash-${module}`} className="text-sm font-semibold text-muted-foreground">
+            {isKnownSection(module) ? t(SECTION_LABEL_KEYS[module]) : module}{" "}
+            <span className="font-normal">({items.length})</span>
+          </h2>
+          <ul className="space-y-2">
+            {items.map((item) => (
+              <TrashItemRow
+                key={`${item.module}-${item.id}`}
+                item={item}
+                now={now}
+                disabled={isBusy}
+                onRestore={() => restoreItem.mutate(item)}
+                onPurge={() => purgeItem.mutate(item)}
+              />
+            ))}
+          </ul>
+        </section>
+      ))}
     </section>
   );
 }

@@ -5,6 +5,9 @@ import pytest
 from habits.application.dtos import HabitCreate
 from habits.application.services import HabitService
 from habits.tests.conftest import InMemoryHabitRepository
+from events.application.dtos import EventCreate
+from events.application.services import EventService
+from events.tests.conftest import InMemoryEventRepository
 from preferences.application.dtos import PreferencesUpdate
 from preferences.application.services import PreferencesService
 from tasks.application.dtos import TaskCreate
@@ -12,7 +15,7 @@ from tasks.application.services import TaskService
 from tasks.tests.conftest import InMemoryTaskRepository
 from trash.application.services import TrashService
 from trash.domain.exceptions import TrashModuleNotFoundError
-from trash.infrastructure.sources import HabitTrashSource, TaskTrashSource
+from trash.infrastructure.sources import EventTrashSource, HabitTrashSource, TaskTrashSource
 from trash.tests.conftest import FakeTrashSource
 
 NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
@@ -120,3 +123,16 @@ async def test_task_source_exposes_trashed_tasks(preferences: PreferencesService
     await service.restore("tasks", task.id)
     assert await service.list_items() == []
     assert [t.id for t in await tasks.list_tasks()] == [task.id]
+
+
+async def test_event_source_exposes_trashed_events(preferences: PreferencesService) -> None:
+    events = EventService(InMemoryEventRepository())
+    event = await events.create_event(EventCreate(title="Party", event_date=date(2026, 9, 26)))
+    await events.delete_event(event.id, days_ago(2))
+    service = TrashService([EventTrashSource(events)], preferences)
+
+    [item] = await service.list_items()
+    assert (item.module, item.id, item.title) == ("events", event.id, "Party")
+
+    await service.purge("events", event.id)
+    assert await service.list_items() == []

@@ -8,23 +8,17 @@ import { toISODate } from "@/shared/lib/dates";
 
 import {
   useCreateColumn,
-  useCreateField,
   useCreateTask,
   useDeleteColumn,
-  useDeleteField,
   useDeleteTask,
   useReorderColumns,
-  useReorderFields,
   useTaskColumns,
-  useTaskFields,
   useTasks,
   useUpdateColumn,
-  useUpdateField,
   useUpdateTask,
 } from "../hooks/useTasks";
 import type { Task } from "../types/task";
 import ManageColumnsDialog from "./ManageColumnsDialog";
-import ManageFieldsDialog from "./ManageFieldsDialog";
 import TaskBoard from "./TaskBoard";
 import TaskCard from "./TaskCard";
 import TaskEditDialog from "./TaskEditDialog";
@@ -41,7 +35,6 @@ export default function TasksPage() {
 
   const tasksQuery = useTasks();
   const columnsQuery = useTaskColumns();
-  const fieldsQuery = useTaskFields();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
@@ -49,15 +42,10 @@ export default function TasksPage() {
   const updateColumn = useUpdateColumn();
   const reorderColumns = useReorderColumns();
   const deleteColumn = useDeleteColumn();
-  const createField = useCreateField();
-  const updateField = useUpdateField();
-  const reorderFields = useReorderFields();
-  const deleteField = useDeleteField();
 
   const columns = columnsQuery.data ?? [];
-  const fields = fieldsQuery.data ?? [];
-  const loadError = tasksQuery.error ?? columnsQuery.error ?? fieldsQuery.error;
-  const isLoading = tasksQuery.isPending || columnsQuery.isPending || fieldsQuery.isPending;
+  const loadError = tasksQuery.error ?? columnsQuery.error;
+  const isLoading = tasksQuery.isPending || columnsQuery.isPending;
   const tasks = tasksQuery.data;
   const isReady = tasks !== undefined && !isLoading && !loadError;
   // While the edit dialog is open it shows update errors itself.
@@ -69,16 +57,12 @@ export default function TasksPage() {
     updateColumn.isPending ||
     reorderColumns.isPending ||
     deleteColumn.isPending;
-  const fieldError = createField.error ?? updateField.error ?? reorderFields.error ?? deleteField.error;
-  const fieldsBusy =
-    createField.isPending || updateField.isPending || reorderFields.isPending || deleteField.isPending;
 
   function renderTask(task: Task) {
     return (
       <TaskCard
         task={task}
         columns={columns}
-        fields={fields}
         today={today}
         disabled={updateTask.isPending && updateTask.variables?.id === task.id}
         onMove={(columnId) => updateTask.mutate({ id: task.id, input: { column_id: columnId } })}
@@ -129,17 +113,6 @@ export default function TasksPage() {
             onReorder={(ids) => reorderColumns.mutate(ids)}
             onDelete={(id) => deleteColumn.mutate(id)}
           />
-          <ManageFieldsDialog
-            fields={fields}
-            disabled={fieldsBusy}
-            error={fieldError ? getErrorMessage(fieldError) : null}
-            onCreate={async (input) => {
-              await createField.mutateAsync(input);
-            }}
-            onUpdate={(id, input) => updateField.mutate({ id, input })}
-            onReorder={(ids) => reorderFields.mutate(ids)}
-            onDelete={(id) => deleteField.mutate(id)}
-          />
         </div>
       </div>
 
@@ -178,7 +151,6 @@ export default function TasksPage() {
       <TaskEditDialog
         task={editing}
         columns={columns}
-        fields={fields}
         onSubmit={async (input) => {
           if (editing) await updateTask.mutateAsync({ id: editing.id, input });
         }}

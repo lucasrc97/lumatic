@@ -2,18 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { Task, TaskColumn, TaskField } from "../types/task";
+import type { Task, TaskColumn } from "../types/task";
 import TaskCard from "./TaskCard";
 
 const COLUMNS: TaskColumn[] = [
   { id: 1, name: "A fazer", color: "#94a3b8", position: 0, is_done: false },
   { id: 3, name: "Concluída", color: "#22c55e", position: 1, is_done: true },
-];
-
-const FIELDS: TaskField[] = [
-  { id: 7, name: "Prioridade", type: "select", options: ["Baixa", "Alta"], position: 0 },
-  { id: 8, name: "Entrega", type: "date", options: [], position: 1 },
-  { id: 9, name: "Horas", type: "number", options: [], position: 2 },
 ];
 
 const TASK: Task = {
@@ -22,30 +16,34 @@ const TASK: Task = {
   description: "Transferência",
   due_date: "2026-09-20",
   column_id: 1,
-  custom_values: { "7": "Alta", "8": "2026-10-02" },
+  priority: "high",
   completed_at: null,
   created_at: "2026-09-01T00:00:00Z",
 };
 
 function renderCard(task: Task = TASK) {
   const handlers = { onMove: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() };
-  render(
-    <TaskCard task={task} columns={COLUMNS} fields={FIELDS} today="2026-09-24" {...handlers} />,
-  );
+  render(<TaskCard task={task} columns={COLUMNS} today="2026-09-24" {...handlers} />);
   return handlers;
 }
 
 describe("TaskCard", () => {
-  it("shows the task details, overdue due date and filled custom fields", () => {
+  it("shows the task details, overdue due date and priority color", () => {
     renderCard();
 
     expect(screen.getByRole("heading", { name: "Pagar aluguel" })).toBeInTheDocument();
     expect(screen.getByText("Transferência")).toBeInTheDocument();
     expect(screen.getByText("20 set")).toBeInTheDocument();
     expect(screen.getByText("(atrasada)")).toBeInTheDocument();
-    expect(screen.getByText("Alta")).toBeInTheDocument();
-    expect(screen.getByText("2 out")).toBeInTheDocument();
-    expect(screen.queryByText(/Horas/)).not.toBeInTheDocument();
+    expect(screen.getByText("Alta")).toHaveStyle({ backgroundColor: "#ef4444" });
+    expect(screen.getByRole("article")).toHaveStyle({ borderLeftColor: "#ef4444" });
+  });
+
+  it("shows no priority tag or accent when there is no priority", () => {
+    renderCard({ ...TASK, priority: "none" });
+
+    expect(screen.queryByText("Sem prioridade")).not.toBeInTheDocument();
+    expect(screen.getByRole("article")).not.toHaveClass("border-l-4");
   });
 
   it("does not flag completed tasks as overdue", () => {

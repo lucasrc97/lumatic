@@ -1,28 +1,12 @@
 from datetime import date, datetime
 from typing import Annotated, Self
 
-from pydantic import (
-    AfterValidator,
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-    model_validator,
-)
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
-from tasks.domain.entities import CustomValue, FieldType, Task, TaskColumn, TaskField
+from tasks.domain.entities import Task, TaskColumn, TaskPriority
 
 HEX_COLOR_PATTERN = r"^#[0-9a-fA-F]{6}$"
 DEFAULT_COLUMN_COLOR = "#94a3b8"
-
-# Values are checked against each field's type by the service; null clears a value.
-CustomValueInput = StrictStr | StrictInt | StrictFloat | None
-CustomValuesInput = Annotated[
-    dict[int, CustomValueInput],
-    Field(description="Values keyed by field id; null clears the value."),
-]
 
 
 def _blank_to_none(value: str | None) -> str | None:
@@ -40,14 +24,13 @@ class TaskCreate(BaseModel):
     description: Description = None
     due_date: date | None = None
     column_id: int | None = Field(default=None, description="Defaults to the first column.")
-    custom_values: CustomValuesInput = Field(default_factory=dict)
+    priority: TaskPriority = TaskPriority.NONE
 
 
 class TaskUpdate(BaseModel):
     """Partial update: omitted fields are left unchanged.
 
     Null clears `description` and `due_date`; it is rejected for the other fields.
-    `custom_values` is merged into the task's values (null removes a value).
     """
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
@@ -56,11 +39,11 @@ class TaskUpdate(BaseModel):
     description: Description = None
     due_date: date | None = None
     column_id: int | None = None
-    custom_values: CustomValuesInput | None = None
+    priority: TaskPriority | None = None
 
     @model_validator(mode="after")
     def _reject_null_required_fields(self) -> Self:
-        for name in ("title", "column_id", "custom_values"):
+        for name in ("title", "column_id", "priority"):
             if name in self.model_fields_set and getattr(self, name) is None:
                 raise ValueError(f"'{name}' cannot be null.")
         return self
@@ -72,7 +55,7 @@ class TaskRead(BaseModel):
     description: str | None
     due_date: date | None
     column_id: int
-    custom_values: dict[int, CustomValue]
+    priority: TaskPriority
     completed_at: datetime | None
     created_at: datetime
 
@@ -84,7 +67,7 @@ class TaskRead(BaseModel):
             description=task.description,
             due_date=task.due_date,
             column_id=task.column_id,
-            custom_values=dict(task.custom_values),
+            priority=task.priority,
             completed_at=task.completed_at,
             created_at=task.created_at,
         )
@@ -137,44 +120,6 @@ class ColumnRead(BaseModel):
             color=column.color,
             position=column.position,
             is_done=column.is_done,
-        )
-
-
-class FieldCreate(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-
-    name: str = Field(min_length=1, max_length=50)
-    type: FieldType
-    options: list[str] = Field(default_factory=list, description="Only for select fields.")
-
-
-class FieldUpdate(BaseModel):
-    """Partial update: omitted or null fields are left unchanged; the type cannot change.
-
-    Removing a select option clears that value from every task.
-    """
-
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-
-    name: str | None = Field(default=None, min_length=1, max_length=50)
-    options: list[str] | None = None
-
-
-class FieldRead(BaseModel):
-    id: int
-    name: str
-    type: FieldType
-    options: list[str]
-    position: int
-
-    @classmethod
-    def from_entity(cls, field: TaskField) -> "FieldRead":
-        return cls(
-            id=field.id,
-            name=field.name,
-            type=field.type,
-            options=list(field.options),
-            position=field.position,
         )
 
 

@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import Any
 
 from sqlalchemy import (
     CheckConstraint,
@@ -12,7 +11,6 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
@@ -37,22 +35,14 @@ class TaskColumnModel(Base):
     is_done: Mapped[bool] = mapped_column(default=False, server_default=false())
 
 
-class TaskFieldModel(Base):
-    __tablename__ = "tasks_fields"
-    __table_args__ = (
-        CheckConstraint("type IN ('text', 'number', 'date', 'select')", name="type_valid"),
-    )
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(50))
-    # A plain string with a CHECK instead of a PostgreSQL ENUM, which is awkward to migrate.
-    type: Mapped[str] = mapped_column(String(10))
-    options: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default="[]")
-    position: Mapped[int]
-
-
 class TaskModel(Base):
     __tablename__ = "tasks_tasks"
+    __table_args__ = (
+        # A plain string with a CHECK instead of a PostgreSQL ENUM, which is awkward to migrate.
+        CheckConstraint(
+            "priority IN ('none', 'low', 'medium', 'high')", name="priority_valid"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(200))
@@ -62,10 +52,7 @@ class TaskModel(Base):
     column_id: Mapped[int] = mapped_column(
         ForeignKey("tasks_columns.id", ondelete="RESTRICT"), index=True
     )
-    # {"<field id>": value}; JSON object keys are always strings.
-    custom_values: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, default=dict, server_default="{}"
-    )
+    priority: Mapped[str] = mapped_column(String(10), default="none", server_default="none")
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

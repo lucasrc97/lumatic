@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { CalendarDays, Pencil, Trash2 } from "lucide-react";
+import { CalendarDays, Flag, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmDialog from "@/shared/components/ConfirmDialog";
@@ -8,13 +8,12 @@ import { NativeSelect } from "@/shared/components/ui/native-select";
 import { useDateLocale } from "@/shared/i18n";
 import { cn } from "@/shared/lib/utils";
 
-import { formatCustomValue } from "../lib/customValues";
-import type { Task, TaskColumn, TaskField } from "../types/task";
+import { PRIORITY_COLORS } from "../lib/priority";
+import type { Task, TaskColumn } from "../types/task";
 
 interface TaskCardProps {
   task: Task;
   columns: TaskColumn[];
-  fields: TaskField[];
   /** `yyyy-MM-dd`, to flag overdue tasks. */
   today: string;
   disabled?: boolean;
@@ -26,7 +25,6 @@ interface TaskCardProps {
 export default function TaskCard({
   task,
   columns,
-  fields,
   today,
   disabled = false,
   onMove,
@@ -37,11 +35,17 @@ export default function TaskCard({
   const locale = useDateLocale();
   const isCompleted = task.completed_at !== null;
   const isOverdue = !isCompleted && task.due_date !== null && task.due_date < today;
-  const filledFields = fields.filter((field) => task.custom_values[field.id] !== undefined);
+  const priorityColor = PRIORITY_COLORS[task.priority];
   const moveId = `task-${task.id}-column`;
 
   return (
-    <article className="space-y-2 rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
+    <article
+      className={cn(
+        "space-y-2 rounded-lg border bg-card p-3 text-card-foreground shadow-sm",
+        priorityColor && "border-l-4",
+      )}
+      style={priorityColor ? { borderLeftColor: priorityColor } : undefined}
+    >
       <div className="flex items-start justify-between gap-2">
         <h3
           className={cn(
@@ -89,8 +93,18 @@ export default function TaskCard({
         </p>
       )}
 
-      {(task.due_date || filledFields.length > 0) && (
+      {(task.due_date || priorityColor) && (
         <ul className="flex flex-wrap gap-1 text-xs">
+          {priorityColor && (
+            <li
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-white"
+              style={{ backgroundColor: priorityColor }}
+            >
+              <Flag className="h-3 w-3" aria-hidden />
+              <span className="sr-only">{t("tasks.priority.label")}:</span>
+              {t(`tasks.priority.${task.priority}`)}
+            </li>
+          )}
           {task.due_date && (
             <li
               className={cn(
@@ -103,12 +117,6 @@ export default function TaskCard({
               {isOverdue && <span className="sr-only">({t("tasks.card.overdue")})</span>}
             </li>
           )}
-          {filledFields.map((field) => (
-            <li key={field.id} className="rounded-full bg-secondary px-2 py-0.5">
-              <span className="text-muted-foreground">{field.name}:</span>{" "}
-              {formatCustomValue(field, task.custom_values[field.id], t("dates.dayShort"), locale)}
-            </li>
-          ))}
         </ul>
       )}
 

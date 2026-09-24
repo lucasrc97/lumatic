@@ -2,17 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { Task, TaskColumn, TaskField } from "../types/task";
+import type { Task, TaskColumn } from "../types/task";
 import TaskEditDialog from "./TaskEditDialog";
 
 const COLUMNS: TaskColumn[] = [
   { id: 1, name: "A fazer", color: "#94a3b8", position: 0, is_done: false },
   { id: 3, name: "Concluída", color: "#22c55e", position: 1, is_done: true },
-];
-
-const FIELDS: TaskField[] = [
-  { id: 7, name: "Prioridade", type: "select", options: ["Baixa", "Alta"], position: 0 },
-  { id: 9, name: "Horas", type: "number", options: [], position: 1 },
 ];
 
 const TASK: Task = {
@@ -21,7 +16,7 @@ const TASK: Task = {
   description: null,
   due_date: "2026-09-30",
   column_id: 1,
-  custom_values: { "7": "Baixa", "9": 2 },
+  priority: "low",
   completed_at: null,
   created_at: "2026-09-01T00:00:00Z",
 };
@@ -32,7 +27,6 @@ function renderDialog(onSubmit = vi.fn().mockResolvedValue(undefined)) {
     <TaskEditDialog
       task={TASK}
       columns={COLUMNS}
-      fields={FIELDS}
       onSubmit={onSubmit}
       onClose={onClose}
       isSubmitting={false}
@@ -42,14 +36,13 @@ function renderDialog(onSubmit = vi.fn().mockResolvedValue(undefined)) {
 }
 
 describe("TaskEditDialog", () => {
-  it("starts from the task's values, including custom fields", () => {
+  it("starts from the task's values", () => {
     renderDialog();
 
     expect(screen.getByLabelText("Título")).toHaveValue("Pagar aluguel");
     expect(screen.getByLabelText("Prazo")).toHaveValue("2026-09-30");
     expect(screen.getByLabelText("Coluna")).toHaveValue("1");
-    expect(screen.getByLabelText("Prioridade")).toHaveValue("Baixa");
-    expect(screen.getByLabelText("Horas")).toHaveValue(2);
+    expect(screen.getByLabelText("Prioridade")).toHaveValue("low");
   });
 
   it("saves every field, clearing emptied ones, and closes", async () => {
@@ -59,7 +52,6 @@ describe("TaskEditDialog", () => {
     await userEvent.clear(screen.getByLabelText("Prazo"));
     await userEvent.selectOptions(screen.getByLabelText("Coluna"), "Concluída");
     await userEvent.selectOptions(screen.getByLabelText("Prioridade"), "Alta");
-    await userEvent.clear(screen.getByLabelText("Horas"));
     await userEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -67,7 +59,7 @@ describe("TaskEditDialog", () => {
       description: "Até dia 5",
       due_date: null,
       column_id: 3,
-      custom_values: { "7": "Alta", "9": null },
+      priority: "high",
     });
     expect(onClose).toHaveBeenCalledOnce();
   });

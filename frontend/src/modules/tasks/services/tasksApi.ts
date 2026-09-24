@@ -3,12 +3,9 @@ import { apiClient } from "@/shared/lib/apiClient";
 import type {
   ColumnCreateInput,
   ColumnUpdateInput,
-  FieldCreateInput,
-  FieldUpdateInput,
   Task,
   TaskColumn,
   TaskCreateInput,
-  TaskField,
   TaskUpdateInput,
 } from "../types/task";
 
@@ -59,32 +56,5 @@ export const columnsApi = {
 
   async remove(id: number): Promise<void> {
     await apiClient.delete(`${BASE_PATH}/columns/${id}`);
-  },
-};
-
-export const fieldsApi = {
-  async list(): Promise<TaskField[]> {
-    const { data } = await apiClient.get<TaskField[]>(`${BASE_PATH}/fields`);
-    return data;
-  },
-
-  async create(input: FieldCreateInput): Promise<TaskField> {
-    const { data } = await apiClient.post<TaskField>(`${BASE_PATH}/fields`, input);
-    return data;
-  },
-
-  async update(id: number, input: FieldUpdateInput): Promise<TaskField> {
-    const { data } = await apiClient.patch<TaskField>(`${BASE_PATH}/fields/${id}`, input);
-    return data;
-  },
-
-  async reorder(ids: number[]): Promise<TaskField[]> {
-    const { data } = await apiClient.put<TaskField[]>(`${BASE_PATH}/fields/order`, { ids });
-    return data;
-  },
-
-  /** Also deletes the field's value in every task. */
-  async remove(id: number): Promise<void> {
-    await apiClient.delete(`${BASE_PATH}/fields/${id}`);
   },
 };

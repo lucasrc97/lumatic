@@ -4,6 +4,7 @@
     "global": "Global menu",
     "habits": "Habits",
     "tasks": "Tasks",
+    "events": "Events",
     "calendar": "Calendar",
     "openMenu": "Open menu",
     "menu": "Menu",
@@ -41,16 +42,54 @@
     "trash_module_not_found": "This kind of item cannot be restored from the trash.",
     "task_not_found": "Task not found.",
     "task_column_not_found": "Column not found.",
-    "task_field_not_found": "Field not found.",
     "task_column_not_empty": "This column still has tasks. Move them to another column before deleting it.",
     "task_done_column_required": "There must always be a done column. Mark another column as done first.",
-    "invalid_task_custom_value": "One of the fields has an invalid value.",
-    "unknown_task_field": "One of the fields no longer exists. Reload the page.",
     "invalid_task_order": "The order changed elsewhere. Reload the page.",
-    "invalid_task_field_options": "An options list needs 1 to 50 distinct options of up to 50 characters each."
+    "event_not_found": "Event not found.",
+    "invalid_event_time": "Invalid time: the end needs a start and cannot be before it."
+  },
+  "month": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "month": "Month",
+    "year": "Year",
+    "today": "Today"
   },
   "calendar": {
-    "placeholder": "Items from each module will show up here as they are implemented."
+    "title": "Calendar",
+    "dayLabel_zero": "{{date}}, nothing scheduled",
+    "dayLabel_one": "{{date}}, {{count}} item",
+    "dayLabel_other": "{{date}}, {{count}} items",
+    "more": "+{{count}}",
+    "dayEmpty": "Nothing scheduled on this day.",
+    "due": "Due",
+    "newEvent": "New event",
+    "newTask": "New task"
+  },
+  "events": {
+    "title": "Events",
+    "new": "New event",
+    "edit": "Edit event",
+    "empty": "No events this month.",
+    "allDay": "All day",
+    "editLabel": "Edit {{title}}",
+    "deleteLabel": "Delete {{title}}",
+    "deleteTitle": "Delete event?",
+    "deleteDescription": "“{{title}}” will be moved to the trash. You can restore it until it is permanently deleted.",
+    "delete": "Delete",
+    "form": {
+      "titleLabel": "Event title",
+      "titlePlaceholder": "e.g. Doctor's appointment",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "allDayHint": "Without a time, the event lasts all day.",
+      "endNeedsStart": "Set a start time to use an end time.",
+      "endBeforeStart": "The end cannot be before the start.",
+      "description": "Description",
+      "create": "Add event",
+      "save": "Save"
+    }
   },
   "habits": {
     "title": "Habits",
@@ -107,7 +146,8 @@
     "purgesIn_other": "deleted forever in {{count}} days",
     "modules": {
       "habits": "Habit",
-      "tasks": "Task"
+      "tasks": "Task",
+      "events": "Event"
     }
   },
   "tasks": {
@@ -164,31 +204,12 @@
       "deleteDescription": "The column “{{name}}” will be deleted.",
       "delete": "Delete"
     },
-    "fields": {
-      "manage": "Fields",
-      "title": "Manage fields",
-      "description": "Extra fields every task can fill in, such as Priority.",
-      "empty": "No fields yet.",
-      "nameLabel": "Field name",
-      "namePlaceholder": "New field",
-      "typeLabel": "Field type",
-      "optionsLabel": "Options",
-      "optionsPlaceholder": "Low, Medium, High",
-      "optionsHint": "Separate options with commas.",
-      "renameLabel": "Name of field {{name}}",
-      "optionsOf": "Options of {{name}}",
-      "moveUp": "Move {{name}} up",
-      "moveDown": "Move {{name}} down",
-      "deleteLabel": "Delete field {{name}}",
-      "deleteTitle": "Delete field?",
-      "deleteDescription": "The field “{{name}}” and its value in every task will be deleted. This cannot be undone.",
-      "delete": "Delete",
-      "types": {
-        "text": "Text",
-        "number": "Number",
-        "date": "Date",
-        "select": "Options list"
-      }
+    "priority": {
+      "label": "Priority",
+      "none": "No priority",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
     }
   },
   "settings": {

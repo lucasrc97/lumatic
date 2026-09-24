@@ -1,13 +1,15 @@
-import { KanbanSquare, ListChecks } from "lucide-react";
+import { CalendarClock, CalendarDays, KanbanSquare, ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
 import { cn } from "@/shared/lib/utils";
 
-/** Modules only; app-wide pages (calendar, trash, settings) live in the top bar's GlobalNav. */
+/** Modules and the calendar view; app-wide pages (trash, settings) live in the top bar. */
 const NAV_ITEMS = [
   { to: "/habits", labelKey: "nav.habits", icon: ListChecks },
   { to: "/tasks", labelKey: "nav.tasks", icon: KanbanSquare },
+  { to: "/events", labelKey: "nav.events", icon: CalendarClock },
+  { to: "/calendar", labelKey: "nav.calendar", icon: CalendarDays },
 ] as const;
 
 interface SidebarProps {

@@ -15,13 +15,6 @@ class TaskColumnNotFoundError(NotFoundError):
         super().__init__(f"Column {column_id} was not found.")
 
 
-class TaskFieldNotFoundError(NotFoundError):
-    code = "task_field_not_found"
-
-    def __init__(self, field_id: int) -> None:
-        super().__init__(f"Field {field_id} was not found.")
-
-
 class TaskColumnNotEmptyError(ConflictError):
     code = "task_column_not_empty"
 
@@ -38,20 +31,6 @@ class DoneColumnRequiredError(ConflictError):
         )
 
 
-class InvalidCustomValueError(InvalidInputError):
-    code = "invalid_task_custom_value"
-
-    def __init__(self, field_name: str) -> None:
-        super().__init__(f"Invalid value for field '{field_name}'.")
-
-
-class UnknownCustomFieldError(InvalidInputError):
-    code = "unknown_task_field"
-
-    def __init__(self, field_id: int) -> None:
-        super().__init__(f"Field {field_id} does not exist.")
-
-
 class InvalidOrderError(InvalidInputError):
     code = "invalid_task_order"
 
@@ -59,5 +38,5 @@ class InvalidOrderError(InvalidInputError):
         super().__init__("The order must list every existing id exactly once.")
 
 
-class InvalidFieldOptionsError(InvalidInputError):
-    code = "invalid_task_field_options"
+class InvalidDateRangeError(InvalidInputError):
+    code = "invalid_date_range"

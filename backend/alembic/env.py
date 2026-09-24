@@ -13,6 +13,7 @@ from core.database import Base
 import habits.infrastructure.persistence  # noqa: F401
 import preferences.infrastructure.persistence  # noqa: F401
 import tasks.infrastructure.persistence  # noqa: F401
+import events.infrastructure.persistence  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

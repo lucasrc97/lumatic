@@ -1,11 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { columnsApi, fieldsApi, tasksApi } from "../services/tasksApi";
+import { columnsApi, tasksApi } from "../services/tasksApi";
 import type {
   ColumnCreateInput,
   ColumnUpdateInput,
-  FieldCreateInput,
-  FieldUpdateInput,
   TaskCreateInput,
   TaskUpdateInput,
 } from "../types/task";
@@ -14,7 +12,6 @@ export const taskKeys = {
   all: ["tasks"] as const,
   tasks: () => [...taskKeys.all, "tasks"] as const,
   columns: () => [...taskKeys.all, "columns"] as const,
-  fields: () => [...taskKeys.all, "fields"] as const,
 };
 
 export function useTasks() {
@@ -25,11 +22,7 @@ export function useTaskColumns() {
   return useQuery({ queryKey: taskKeys.columns(), queryFn: columnsApi.list });
 }
 
-export function useTaskFields() {
-  return useQuery({ queryKey: taskKeys.fields(), queryFn: fieldsApi.list });
-}
-
-/** Columns and fields change tasks too (completion, removed values), so refresh the module. */
+/** Column changes affect tasks too (completion), so refresh the whole module. */
 function useInvalidateTasks() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: taskKeys.all });
@@ -90,39 +83,6 @@ export function useDeleteColumn() {
   const invalidate = useInvalidateTasks();
   return useMutation({
     mutationFn: (id: number) => columnsApi.remove(id),
-    onSuccess: invalidate,
-  });
-}
-
-export function useCreateField() {
-  const invalidate = useInvalidateTasks();
-  return useMutation({
-    mutationFn: (input: FieldCreateInput) => fieldsApi.create(input),
-    onSuccess: invalidate,
-  });
-}
-
-export function useUpdateField() {
-  const invalidate = useInvalidateTasks();
-  return useMutation({
-    mutationFn: ({ id, input }: { id: number; input: FieldUpdateInput }) =>
-      fieldsApi.update(id, input),
-    onSuccess: invalidate,
-  });
-}
-
-export function useReorderFields() {
-  const invalidate = useInvalidateTasks();
-  return useMutation({
-    mutationFn: (ids: number[]) => fieldsApi.reorder(ids),
-    onSuccess: invalidate,
-  });
-}
-
-export function useDeleteField() {
-  const invalidate = useInvalidateTasks();
-  return useMutation({
-    mutationFn: (id: number) => fieldsApi.remove(id),
     onSuccess: invalidate,
   });
 }

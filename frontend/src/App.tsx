@@ -4,6 +4,7 @@ import AppLayout from "@/layouts/AppLayout";
 import CalendarView from "@/layouts/CalendarView";
 import HabitsPage from "@/modules/habits/components/HabitsPage";
 import SettingsPage from "@/modules/preferences/components/SettingsPage";
+import TasksPage from "@/modules/tasks/components/TasksPage";
 import TrashPage from "@/modules/trash/components/TrashPage";
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/habits" replace />} />
         <Route path="habits" element={<HabitsPage />} />
+        <Route path="tasks" element={<TasksPage />} />
         <Route path="calendar" element={<CalendarView />} />
         <Route path="trash" element={<TrashPage />} />
         <Route path="settings" element={<SettingsPage />} />

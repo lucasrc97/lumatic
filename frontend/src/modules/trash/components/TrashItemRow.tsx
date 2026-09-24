@@ -11,6 +11,7 @@ import type { TrashItem } from "../types/trash";
 /** Translation key for each module's item label; unknown modules show their raw name. */
 const MODULE_LABEL_KEYS = {
   habits: "trash.modules.habits",
+  tasks: "trash.modules.tasks",
 } as const;
 
 function isKnownModule(module: string): module is keyof typeof MODULE_LABEL_KEYS {

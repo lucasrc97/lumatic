@@ -2,6 +2,7 @@
   "nav": {
     "main": "Main navigation",
     "habits": "Habits",
+    "tasks": "Tasks",
     "calendar": "Calendar",
     "openMenu": "Open menu",
     "menu": "Menu",
@@ -30,7 +31,16 @@
     "habit_not_found": "Habit not found.",
     "habit_archived": "This habit is archived and cannot be changed.",
     "invalid_date_range": "Invalid date range.",
-    "trash_module_not_found": "This kind of item cannot be restored from the trash."
+    "trash_module_not_found": "This kind of item cannot be restored from the trash.",
+    "task_not_found": "Task not found.",
+    "task_column_not_found": "Column not found.",
+    "task_field_not_found": "Field not found.",
+    "task_column_not_empty": "This column still has tasks. Move them to another column before deleting it.",
+    "task_done_column_required": "There must always be a done column. Mark another column as done first.",
+    "invalid_task_custom_value": "One of the fields has an invalid value.",
+    "unknown_task_field": "One of the fields no longer exists. Reload the page.",
+    "invalid_task_order": "The order changed elsewhere. Reload the page.",
+    "invalid_task_field_options": "An options list needs 1 to 50 distinct options of up to 50 characters each."
   },
   "calendar": {
     "placeholder": "Items from each module will show up here as they are implemented."
@@ -81,7 +91,89 @@
     "purgesIn_one": "deleted forever in {{count}} day",
     "purgesIn_other": "deleted forever in {{count}} days",
     "modules": {
-      "habits": "Habit"
+      "habits": "Habit",
+      "tasks": "Task"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "view": "View",
+    "viewList": "List",
+    "viewBoard": "Board",
+    "empty": "No tasks yet. Add the first one above.",
+    "form": {
+      "titleLabel": "Task title",
+      "titlePlaceholder": "New task",
+      "dueDateLabel": "Due date"
+    },
+    "groups": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "upcoming": "Upcoming",
+      "noDate": "No due date",
+      "completed": "Completed"
+    },
+    "card": {
+      "moveLabel": "Column of {{title}}",
+      "editLabel": "Edit {{title}}",
+      "deleteLabel": "Delete {{title}}",
+      "deleteTitle": "Delete task?",
+      "deleteDescription": "“{{title}}” will be moved to the trash. You can restore it until it is permanently deleted.",
+      "delete": "Delete",
+      "overdue": "overdue"
+    },
+    "edit": {
+      "title": "Edit task",
+      "titleLabel": "Title",
+      "description": "Description",
+      "dueDate": "Due date",
+      "column": "Column",
+      "save": "Save"
+    },
+    "columns": {
+      "manage": "Columns",
+      "title": "Manage columns",
+      "description": "The done column marks its tasks as completed. Only empty columns can be deleted.",
+      "nameLabel": "Column name",
+      "namePlaceholder": "New column",
+      "colorLabel": "Column color",
+      "renameLabel": "Name of column {{name}}",
+      "recolorLabel": "Color of column {{name}}",
+      "done": "Done",
+      "markDone": "Use {{name}} as the done column",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "deleteLabel": "Delete column {{name}}",
+      "deleteTitle": "Delete column?",
+      "deleteDescription": "The column “{{name}}” will be deleted.",
+      "delete": "Delete"
+    },
+    "fields": {
+      "manage": "Fields",
+      "title": "Manage fields",
+      "description": "Extra fields every task can fill in, such as Priority.",
+      "empty": "No fields yet.",
+      "nameLabel": "Field name",
+      "namePlaceholder": "New field",
+      "typeLabel": "Field type",
+      "optionsLabel": "Options",
+      "optionsPlaceholder": "Low, Medium, High",
+      "optionsHint": "Separate options with commas.",
+      "renameLabel": "Name of field {{name}}",
+      "optionsOf": "Options of {{name}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "deleteLabel": "Delete field {{name}}",
+      "deleteTitle": "Delete field?",
+      "deleteDescription": "The field “{{name}}” and its value in every task will be deleted. This cannot be undone.",
+      "delete": "Delete",
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "date": "Date",
+        "select": "Options list"
+      }
     }
   },
   "settings": {

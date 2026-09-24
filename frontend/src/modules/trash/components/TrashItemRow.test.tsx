@@ -38,6 +38,12 @@ describe("TrashItemRow", () => {
     expect(screen.getByText(/excluído de vez em 26 dias/)).toBeInTheDocument();
   });
 
+  it("labels items from the tasks module", () => {
+    renderRow({ ...ITEM, module: "tasks", title: "Pagar aluguel" });
+
+    expect(screen.getByText(/Tarefa · Excluído em 20 set/)).toBeInTheDocument();
+  });
+
   it("says when the item is due for deletion today", () => {
     renderRow({ ...ITEM, purge_at: "2026-09-24T18:00:00Z" });
 

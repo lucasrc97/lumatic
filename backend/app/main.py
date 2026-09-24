@@ -9,6 +9,7 @@ from core.config import settings
 from core.errors import register_error_handlers
 from habits.api.routes import router as habits_router
 from preferences.api.routes import router as preferences_router
+from tasks.api.routes import router as tasks_router
 from trash.api.routes import router as trash_router
 from trash.infrastructure.scheduler import run_trash_purge_loop
 
@@ -35,6 +36,7 @@ register_error_handlers(app)
 
 app.include_router(habits_router)
 app.include_router(preferences_router)
+app.include_router(tasks_router)
 app.include_router(trash_router)
 
 

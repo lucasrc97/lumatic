@@ -12,6 +12,7 @@ from core.database import Base
 # Import every module's models so autogenerate sees their tables.
 import habits.infrastructure.persistence  # noqa: F401
 import preferences.infrastructure.persistence  # noqa: F401
+import tasks.infrastructure.persistence  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

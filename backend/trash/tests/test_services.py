@@ -7,9 +7,12 @@ from habits.application.services import HabitService
 from habits.tests.conftest import InMemoryHabitRepository
 from preferences.application.dtos import PreferencesUpdate
 from preferences.application.services import PreferencesService
+from tasks.application.dtos import TaskCreate
+from tasks.application.services import TaskService
+from tasks.tests.conftest import InMemoryTaskRepository
 from trash.application.services import TrashService
 from trash.domain.exceptions import TrashModuleNotFoundError
-from trash.infrastructure.sources import HabitTrashSource
+from trash.infrastructure.sources import HabitTrashSource, TaskTrashSource
 from trash.tests.conftest import FakeTrashSource
 
 NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
@@ -103,3 +106,17 @@ async def test_habit_source_exposes_trashed_habits(preferences: PreferencesServi
     await service.restore("habits", habit.id)
     assert await service.list_items() == []
     assert await habits.list_trashed() == []
+
+
+async def test_task_source_exposes_trashed_tasks(preferences: PreferencesService) -> None:
+    tasks = TaskService(InMemoryTaskRepository())
+    task = await tasks.create_task(TaskCreate(title="Pay rent"), NOW)
+    await tasks.delete_task(task.id, days_ago(2))
+    service = TrashService([TaskTrashSource(tasks)], preferences)
+
+    [item] = await service.list_items()
+    assert (item.module, item.id, item.title) == ("tasks", task.id, "Pay rent")
+
+    await service.restore("tasks", task.id)
+    assert await service.list_items() == []
+    assert [t.id for t in await tasks.list_tasks()] == [task.id]

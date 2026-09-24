@@ -2,6 +2,7 @@
   "nav": {
     "main": "Navegação principal",
     "habits": "Hábitos",
+    "tasks": "Tarefas",
     "calendar": "Calendário",
     "openMenu": "Abrir menu",
     "menu": "Menu",
@@ -30,7 +31,16 @@
     "habit_not_found": "Hábito não encontrado.",
     "habit_archived": "Este hábito está arquivado e não pode ser alterado.",
     "invalid_date_range": "Intervalo de datas inválido.",
-    "trash_module_not_found": "Este tipo de item não pode ser restaurado da lixeira."
+    "trash_module_not_found": "Este tipo de item não pode ser restaurado da lixeira.",
+    "task_not_found": "Tarefa não encontrada.",
+    "task_column_not_found": "Coluna não encontrada.",
+    "task_field_not_found": "Campo não encontrado.",
+    "task_column_not_empty": "Esta coluna ainda tem tarefas. Mova-as para outra coluna antes de excluí-la.",
+    "task_done_column_required": "Sempre deve existir uma coluna de concluídas. Marque outra coluna como concluídas antes.",
+    "invalid_task_custom_value": "Um dos campos tem um valor inválido.",
+    "unknown_task_field": "Um dos campos não existe mais. Recarregue a página.",
+    "invalid_task_order": "A ordem mudou em outro lugar. Recarregue a página.",
+    "invalid_task_field_options": "Uma lista de opções precisa de 1 a 50 opções diferentes, com até 50 caracteres cada."
   },
   "calendar": {
     "placeholder": "Os itens de cada módulo aparecerão aqui conforme forem implementados."
@@ -81,7 +91,89 @@
     "purgesIn_one": "excluído de vez em {{count}} dia",
     "purgesIn_other": "excluído de vez em {{count}} dias",
     "modules": {
-      "habits": "Hábito"
+      "habits": "Hábito",
+      "tasks": "Tarefa"
+    }
+  },
+  "tasks": {
+    "title": "Tarefas",
+    "view": "Visualização",
+    "viewList": "Lista",
+    "viewBoard": "Kanban",
+    "empty": "Nenhuma tarefa ainda. Adicione a primeira acima.",
+    "form": {
+      "titleLabel": "Título da tarefa",
+      "titlePlaceholder": "Nova tarefa",
+      "dueDateLabel": "Prazo"
+    },
+    "groups": {
+      "overdue": "Atrasadas",
+      "today": "Hoje",
+      "tomorrow": "Amanhã",
+      "upcoming": "Próximas",
+      "noDate": "Sem prazo",
+      "completed": "Concluídas"
+    },
+    "card": {
+      "moveLabel": "Coluna de {{title}}",
+      "editLabel": "Editar {{title}}",
+      "deleteLabel": "Excluir {{title}}",
+      "deleteTitle": "Excluir tarefa?",
+      "deleteDescription": "“{{title}}” irá para a lixeira. Você pode restaurá-la até que seja excluída de vez.",
+      "delete": "Excluir",
+      "overdue": "atrasada"
+    },
+    "edit": {
+      "title": "Editar tarefa",
+      "titleLabel": "Título",
+      "description": "Descrição",
+      "dueDate": "Prazo",
+      "column": "Coluna",
+      "save": "Salvar"
+    },
+    "columns": {
+      "manage": "Colunas",
+      "title": "Gerenciar colunas",
+      "description": "A coluna de concluídas marca as tarefas como concluídas. Só é possível excluir colunas vazias.",
+      "nameLabel": "Nome da coluna",
+      "namePlaceholder": "Nova coluna",
+      "colorLabel": "Cor da coluna",
+      "renameLabel": "Nome da coluna {{name}}",
+      "recolorLabel": "Cor da coluna {{name}}",
+      "done": "Concluídas",
+      "markDone": "Usar {{name}} como coluna de concluídas",
+      "moveUp": "Mover {{name}} para cima",
+      "moveDown": "Mover {{name}} para baixo",
+      "deleteLabel": "Excluir coluna {{name}}",
+      "deleteTitle": "Excluir coluna?",
+      "deleteDescription": "A coluna “{{name}}” será excluída.",
+      "delete": "Excluir"
+    },
+    "fields": {
+      "manage": "Campos",
+      "title": "Gerenciar campos",
+      "description": "Campos extras que toda tarefa pode preencher, como Prioridade.",
+      "empty": "Nenhum campo ainda.",
+      "nameLabel": "Nome do campo",
+      "namePlaceholder": "Novo campo",
+      "typeLabel": "Tipo do campo",
+      "optionsLabel": "Opções",
+      "optionsPlaceholder": "Baixa, Média, Alta",
+      "optionsHint": "Separe as opções por vírgula.",
+      "renameLabel": "Nome do campo {{name}}",
+      "optionsOf": "Opções de {{name}}",
+      "moveUp": "Mover {{name}} para cima",
+      "moveDown": "Mover {{name}} para baixo",
+      "deleteLabel": "Excluir campo {{name}}",
+      "deleteTitle": "Excluir campo?",
+      "deleteDescription": "O campo “{{name}}” e o valor dele em todas as tarefas serão excluídos. Esta ação não pode ser desfeita.",
+      "delete": "Excluir",
+      "types": {
+        "text": "Texto",
+        "number": "Número",
+        "date": "Data",
+        "select": "Lista de opções"
+      }
     }
   },
   "settings": {

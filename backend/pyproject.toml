@@ -1,0 +1,11 @@
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["^alembic/", "/migrations/", "^\\.venv/"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+markers = [
+    "integration: requires a migrated PostgreSQL database (set RUN_INTEGRATION_TESTS=1)",
+]

@@ -1,0 +1,24 @@
+CLAUDE.md
+STACK.md
+V2.2-VALIDATION.md
+.claude/
+.codegraph/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+dev-dist/
+coverage/

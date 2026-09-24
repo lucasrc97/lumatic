@@ -1,0 +1,70 @@
+import { Plus } from "lucide-react";
+import { useState, type FormEvent } from "react";
+
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+
+import type { HabitCreateInput } from "../types/habit";
+
+const DEFAULT_COLOR = "#22c55e";
+
+interface HabitFormProps {
+  /** Should reject on failure; the form keeps its input and the parent shows `error`. */
+  onSubmit: (input: HabitCreateInput) => Promise<void>;
+  isSubmitting: boolean;
+  error?: string | null;
+}
+
+export default function HabitForm({ onSubmit, isSubmitting, error }: HabitFormProps) {
+  const [name, setName] = useState("");
+  const [color, setColor] = useState(DEFAULT_COLOR);
+  const trimmedName = name.trim();
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!trimmedName) return;
+    try {
+      await onSubmit({ name: trimmedName, color });
+      setName("");
+    } catch {
+      // Failure is reported through the `error` prop; keep the typed name for a retry.
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-1">
+      <div className="flex gap-2">
+        <label htmlFor="habit-name" className="sr-only">
+          Nome do hábito
+        </label>
+        <Input
+          id="habit-name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Novo hábito"
+          maxLength={100}
+          autoComplete="off"
+        />
+        <label htmlFor="habit-color" className="sr-only">
+          Cor
+        </label>
+        <Input
+          id="habit-color"
+          type="color"
+          value={color}
+          onChange={(event) => setColor(event.target.value)}
+          className="w-12 shrink-0 cursor-pointer p-1"
+        />
+        <Button type="submit" disabled={!trimmedName || isSubmitting} className="shrink-0">
+          <Plus className="h-4 w-4" aria-hidden />
+          <span className="sr-only sm:not-sr-only">Adicionar</span>
+        </Button>
+      </div>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}

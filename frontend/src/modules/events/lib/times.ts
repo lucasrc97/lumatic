@@ -8,3 +8,11 @@ export function formatTimeRange(start: string | null, end: string | null): strin
   if (!start) return null;
   return end ? `${toTimeInput(start)}–${toTimeInput(end)}` : toTimeInput(start);
 }
+
+/** Why a start/end pair (`HH:mm`, empty when unset) is invalid, as an `events.form.*` key. */
+export function timeProblem(start: string, end: string): "endNeedsStart" | "endBeforeStart" | null {
+  if (end && !start) return "endNeedsStart";
+  // `HH:mm` strings compare like the times they represent.
+  if (end && end < start) return "endBeforeStart";
+  return null;
+}

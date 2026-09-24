@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppLayout from "@/layouts/AppLayout";
-import CalendarPage from "@/modules/calendar/components/CalendarPage";
 import EventsPage from "@/modules/events/components/EventsPage";
 import HabitsPage from "@/modules/habits/components/HabitsPage";
 import SettingsPage from "@/modules/preferences/components/SettingsPage";
@@ -16,7 +15,6 @@ export default function App() {
         <Route path="habits" element={<HabitsPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="events" element={<EventsPage />} />
-        <Route path="calendar" element={<CalendarPage />} />
         <Route path="trash" element={<TrashPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/habits" replace />} />

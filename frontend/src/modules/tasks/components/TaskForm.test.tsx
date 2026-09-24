@@ -34,16 +34,6 @@ describe("TaskForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Falhou");
   });
 
-  it("starts from a given due date and keeps it after submitting", async () => {
-    const onSubmit = vi.fn().mockResolvedValue(undefined);
-    render(<TaskForm onSubmit={onSubmit} isSubmitting={false} initialDueDate="2026-10-02" />);
-
-    await userEvent.type(screen.getByLabelText("Título da tarefa"), "Revisar{Enter}");
-
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ due_date: "2026-10-02" }));
-    expect(screen.getByLabelText("Prazo")).toHaveValue("2026-10-02");
-  });
-
   it("does not submit a blank title", () => {
     render(<TaskForm onSubmit={vi.fn()} isSubmitting={false} />);
 

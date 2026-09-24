@@ -42,14 +42,15 @@ describe("MonthGrid", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("lists up to three titles per day and counts the rest", () => {
+  it("marks each item on its day with a dot per module, without titles", () => {
     renderGrid();
 
-    expect(screen.getByText("Dentista")).toBeInTheDocument();
-    expect(screen.getByText("Pagar aluguel")).toBeInTheDocument();
-    expect(screen.getByText("Reunião")).toBeInTheDocument();
-    expect(screen.queryByText("Academia")).not.toBeInTheDocument();
-    expect(screen.getByText("+1")).toBeInTheDocument();
+    const day = screen.getByRole("button", { name: /^sexta-feira, 25 de setembro/ });
+    const dots = [...day.querySelectorAll("[data-module]")].map((dot) =>
+      dot.getAttribute("data-module"),
+    );
+    expect(dots).toEqual(["events", "tasks", "events", "events"]);
+    expect(screen.queryByText("Dentista")).not.toBeInTheDocument();
   });
 
   it("selects a day when clicked", async () => {

@@ -13,23 +13,13 @@ interface TaskFormProps {
   onSubmit: (input: TaskCreateInput) => Promise<void>;
   isSubmitting: boolean;
   error?: string | null;
-  /** `yyyy-MM-dd` to start with, e.g. the day picked in the calendar. */
-  initialDueDate?: string;
-  /** Prefix for input ids, so two forms can share a page. */
-  idPrefix?: string;
 }
 
 /** Quick task creation: title, optional due date and priority. The rest is set when editing. */
-export default function TaskForm({
-  onSubmit,
-  isSubmitting,
-  error,
-  initialDueDate = "",
-  idPrefix = "task",
-}: TaskFormProps) {
+export default function TaskForm({ onSubmit, isSubmitting, error }: TaskFormProps) {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState(initialDueDate);
+  const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<Priority>("none");
   const trimmedTitle = title.trim();
 
@@ -39,7 +29,7 @@ export default function TaskForm({
     try {
       await onSubmit({ title: trimmedTitle, due_date: dueDate || null, priority });
       setTitle("");
-      setDueDate(initialDueDate);
+      setDueDate("");
       setPriority("none");
     } catch {
       // Failure is reported through the `error` prop; keep the input for a retry.
@@ -49,11 +39,11 @@ export default function TaskForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-1">
       <div className="flex flex-wrap gap-2">
-        <label htmlFor={`${idPrefix}-title`} className="sr-only">
+        <label htmlFor="task-title" className="sr-only">
           {t("tasks.form.titleLabel")}
         </label>
         <Input
-          id={`${idPrefix}-title`}
+          id="task-title"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder={t("tasks.form.titlePlaceholder")}
@@ -61,21 +51,21 @@ export default function TaskForm({
           autoComplete="off"
           className="min-w-0 basis-full sm:flex-1 sm:basis-auto"
         />
-        <label htmlFor={`${idPrefix}-due-date`} className="sr-only">
+        <label htmlFor="task-due-date" className="sr-only">
           {t("tasks.form.dueDateLabel")}
         </label>
         <Input
-          id={`${idPrefix}-due-date`}
+          id="task-due-date"
           type="date"
           value={dueDate}
           onChange={(event) => setDueDate(event.target.value)}
           className="w-36 min-w-0 flex-1 sm:w-40 sm:flex-none"
         />
-        <label htmlFor={`${idPrefix}-priority`} className="sr-only">
+        <label htmlFor="task-priority" className="sr-only">
           {t("tasks.priority.label")}
         </label>
         <PrioritySelect
-          id={`${idPrefix}-priority`}
+          id="task-priority"
           value={priority}
           onChange={setPriority}
           className="w-28 min-w-0 flex-1 sm:flex-none"

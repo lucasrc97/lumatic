@@ -22,10 +22,13 @@ export function useTaskColumns() {
   return useQuery({ queryKey: taskKeys.columns(), queryFn: columnsApi.list });
 }
 
-/** Column changes affect tasks too (completion), so refresh the whole module. */
+/**
+ * Column changes affect tasks too (completion), and due dates show up in the calendar,
+ * which lives elsewhere; invalidate every query instead of coupling to its keys.
+ */
 function useInvalidateTasks() {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: taskKeys.all });
+  return () => queryClient.invalidateQueries();
 }
 
 export function useCreateTask() {

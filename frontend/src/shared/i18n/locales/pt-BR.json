@@ -60,15 +60,11 @@
     "dayLabel_zero": "{{date}}, nada marcado",
     "dayLabel_one": "{{date}}, {{count}} item",
     "dayLabel_other": "{{date}}, {{count}} itens",
-    "more": "+{{count}}",
     "dayEmpty": "Nada marcado neste dia.",
-    "due": "Prazo",
-    "newEvent": "Novo evento",
-    "newTask": "Nova tarefa"
+    "due": "Prazo"
   },
   "events": {
     "title": "Eventos",
-    "new": "Novo evento",
     "edit": "Editar evento",
     "empty": "Nenhum evento neste mês.",
     "allDay": "Dia inteiro",
@@ -87,7 +83,6 @@
       "endNeedsStart": "Informe o início para usar um horário de fim.",
       "endBeforeStart": "O fim não pode ser antes do início.",
       "description": "Descrição",
-      "create": "Adicionar evento",
       "save": "Salvar"
     }
   },

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 
+import CalendarPanel from "@/modules/calendar/components/CalendarPanel";
+import { readPanelOpen, savePanelOpen } from "@/modules/calendar/lib/panelPreference";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet";
 
@@ -12,6 +14,13 @@ import Sidebar from "./Sidebar";
 export default function AppLayout() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(readPanelOpen);
+
+  function toggleCalendar() {
+    const next = !calendarOpen;
+    setCalendarOpen(next);
+    savePanelOpen(next);
+  }
 
   return (
     <div className="flex min-h-dvh">
@@ -36,11 +45,12 @@ export default function AppLayout() {
             <span className="font-semibold">Lumatic</span>
           </div>
           <div className="ml-auto">
-            <GlobalNav />
+            <GlobalNav calendarOpen={calendarOpen} onToggleCalendar={toggleCalendar} />
           </div>
         </header>
 
         <main className="flex-1 p-4 md:p-6">
+          {calendarOpen && <CalendarPanel />}
           <Outlet />
         </main>
       </div>

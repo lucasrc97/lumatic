@@ -24,9 +24,14 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 - The starting columns (*A fazer*, *Em andamento*, *Concluída*) are created by the migration; like any user
   data they are not translated.
 
-**Calendário** — month view (any month/year) of dated items from every module: events and task due dates for
-now. Picking a day lists what is already scheduled there and lets you add an event or a task on that day.
+**Calendário** — a collapsible panel opened from the top bar, shown above the current page (the choice is
+remembered in the browser). It shows any month/year with dated items from every module: events and task
+due dates for now. Picking a day lists what is already scheduled there (the list can be collapsed with the
+arrow next to the date).
 It is a view, not a module: it reads through each module's service and stores nothing (see below).
+
+**Eventos** and **Tarefas** share the same flow: a quick-add form at the top of the page, and a dialog for
+editing the details (description, etc.).
 
 **Lixeira (Trash)** — deleted items from every module go to the trash, where they can be restored or permanently deleted. Items are purged automatically after a retention period (default 30 days, editable in **Configurações / Settings**).
 
@@ -34,7 +39,7 @@ It is a view, not a module: it reads through each module's service and stores no
 
 ## Interface
 
-- Left sidebar with the modules and the Calendário; a top bar with app-wide pages (Lixeira, Configurações)
+- Left sidebar with the modules; a top bar with the Calendário panel toggle and app-wide pages (Lixeira, Configurações)
 - Lixeira groups deleted items by module
 - Theme — light / dark / system (default), chosen in Settings and saved in the browser
 - Language — Português (default) / English, chosen in Settings and saved in the browser
@@ -81,7 +86,7 @@ Modules do not share database tables.
 - **Approach:** same pattern as the trash. `calendar_view` owns no tables and never writes; it aggregates
   modules through the `CalendarSource` contract (`calendar_view/domain/sources.py`), with one adapter per
   module in `calendar_view/infrastructure/sources.py`. `GET /api/v1/calendar/items?from=&to=` returns the
-  merged items. Creating from the calendar calls each module's own API.
+  merged items. The calendar never creates items; that happens in each module's page.
 - **Naming:** the package is `calendar_view` because `calendar` would shadow Python's standard library module.
 - **Adding a module to the calendar:** give its service a "items between two dates" query, write its adapter
   and register it in `build_calendar_service`.
@@ -166,7 +171,7 @@ Lumatic/
     └── src/
         ├── modules/        (one folder per module)
         ├── shared/         (shared components)
-        └── layouts/        (sidebar, calendar view)
+        └── layouts/        (app shell: sidebar, top bar)
 ```
 
 Each backend module follows: `domain/ → application/ → infrastructure/ → api/ → tests/`

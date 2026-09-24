@@ -1,16 +1,13 @@
-import { CalendarDays, KanbanSquare, ListChecks, Settings, Trash2 } from "lucide-react";
+import { KanbanSquare, ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
-import LanguageSwitcher from "@/shared/components/LanguageSwitcher";
 import { cn } from "@/shared/lib/utils";
 
+/** Modules only; app-wide pages (calendar, trash, settings) live in the top bar's GlobalNav. */
 const NAV_ITEMS = [
   { to: "/habits", labelKey: "nav.habits", icon: ListChecks },
   { to: "/tasks", labelKey: "nav.tasks", icon: KanbanSquare },
-  { to: "/calendar", labelKey: "nav.calendar", icon: CalendarDays },
-  { to: "/trash", labelKey: "nav.trash", icon: Trash2 },
-  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;
 
 interface SidebarProps {
@@ -41,9 +38,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
-      <div className="mt-auto px-1 pt-4">
-        <LanguageSwitcher />
-      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 {
   "nav": {
     "main": "Main navigation",
+    "global": "Global menu",
     "habits": "Habits",
     "tasks": "Tasks",
     "calendar": "Calendar",
@@ -11,6 +12,12 @@
   },
   "language": {
     "label": "Language"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "common": {
     "cancel": "Cancel",
@@ -70,6 +77,14 @@
       "deleteTitle": "Delete habit?",
       "deleteDescription": "“{{name}}” will be moved to the trash along with its history. You can restore it until it is permanently deleted.",
       "delete": "Delete"
+    },
+    "archived": {
+      "manage": "Archived",
+      "title": "Archived habits",
+      "description": "Archived habits are hidden from the list and cannot be checked off. Their history is kept.",
+      "empty": "No archived habits.",
+      "unarchive": "Unarchive",
+      "unarchiveLabel": "Unarchive {{name}}"
     }
   },
   "trash": {
@@ -179,6 +194,7 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
+    "theme": "Theme",
     "trash": "Trash",
     "retentionLabel": "Days until permanent deletion",
     "retentionHint": "Between {{min}} and {{max}} days.",

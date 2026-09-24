@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import LanguageSwitcher from "@/shared/components/LanguageSwitcher";
+import ThemeSwitcher from "@/shared/components/ThemeSwitcher";
 import { getErrorMessage } from "@/shared/lib/apiClient";
 
 import { usePreferences, useUpdatePreferences } from "../hooks/usePreferences";
@@ -18,6 +19,11 @@ export default function SettingsPage() {
       <div className="space-y-2">
         <h2 className="text-lg font-medium">{t("settings.language")}</h2>
         <LanguageSwitcher />
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-lg font-medium">{t("settings.theme")}</h2>
+        <ThemeSwitcher />
       </div>
 
       <div className="space-y-2">

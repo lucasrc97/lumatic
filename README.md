@@ -34,9 +34,9 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 
 ## Interface
 
-- Collapsible left sidebar (or repositionable per user preference)
-- Dark / light theme toggle
-- Language toggle — Português (default) / English; the choice is saved in the browser
+- Left sidebar with the modules; a top bar with app-wide pages (Calendário, Lixeira, Configurações)
+- Theme — light / dark / system (default), chosen in Settings and saved in the browser
+- Language — Português (default) / English, chosen in Settings and saved in the browser
 - Fully responsive — works on mobile via PWA install from browser
 
 ---

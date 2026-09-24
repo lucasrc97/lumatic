@@ -7,12 +7,24 @@ export const habitKeys = {
   all: ["habits"] as const,
   list: (range: DateRange, today: string) =>
     [...habitKeys.all, "list", range.from, range.to, today] as const,
+  archived: (today: string) => [...habitKeys.all, "archived", today] as const,
 };
 
 export function useHabits(range: DateRange, today: string) {
   return useQuery({
     queryKey: habitKeys.list(range, today),
     queryFn: () => habitsApi.list(range, today),
+  });
+}
+
+/** Archived habits only; the date range just bounds the (unused) completion dates. */
+export function useArchivedHabits(today: string) {
+  return useQuery({
+    queryKey: habitKeys.archived(today),
+    queryFn: async () => {
+      const habits = await habitsApi.list({ from: today, to: today }, today, true);
+      return habits.filter((habit) => habit.archived);
+    },
   });
 }
 

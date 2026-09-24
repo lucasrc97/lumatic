@@ -11,9 +11,10 @@ import type {
 const BASE_PATH = "/v1/habits/habits";
 
 export const habitsApi = {
-  async list(range: DateRange, today: string): Promise<HabitProgress[]> {
+  /** Active habits; with `includeArchived`, archived ones too. */
+  async list(range: DateRange, today: string, includeArchived = false): Promise<HabitProgress[]> {
     const { data } = await apiClient.get<HabitProgress[]>(BASE_PATH, {
-      params: { from: range.from, to: range.to, today },
+      params: { from: range.from, to: range.to, today, include_archived: includeArchived },
     });
     return data;
   },

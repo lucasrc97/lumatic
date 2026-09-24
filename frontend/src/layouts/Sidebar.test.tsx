@@ -6,18 +6,27 @@ import { describe, expect, it, vi } from "vitest";
 import Sidebar from "./Sidebar";
 
 describe("Sidebar", () => {
-  it("links to each section and marks the current one", () => {
+  it("links to each module and marks the current one", () => {
     render(
-      <MemoryRouter initialEntries={["/calendar"]}>
+      <MemoryRouter initialEntries={["/tasks"]}>
         <Sidebar />
       </MemoryRouter>,
     );
 
     expect(screen.getByRole("link", { name: "Hábitos" })).toHaveAttribute("href", "/habits");
-    expect(screen.getByRole("link", { name: "Calendário" })).toHaveAttribute(
-      "aria-current",
-      "page",
+    expect(screen.getByRole("link", { name: "Tarefas" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("leaves app-wide pages and the language choice to other places", () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>,
     );
+
+    expect(screen.queryByRole("link", { name: "Calendário" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Configurações" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "English" })).not.toBeInTheDocument();
   });
 
   it("notifies when a link is followed so the mobile menu can close", async () => {
@@ -31,20 +40,5 @@ describe("Sidebar", () => {
     await userEvent.click(screen.getByRole("link", { name: "Hábitos" }));
 
     expect(onNavigate).toHaveBeenCalledOnce();
-  });
-
-  it("switches the interface language and remembers the choice", async () => {
-    render(
-      <MemoryRouter>
-        <Sidebar />
-      </MemoryRouter>,
-    );
-
-    await userEvent.click(screen.getByRole("button", { name: "English" }));
-
-    expect(screen.getByRole("link", { name: "Habits" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
-    expect(document.documentElement.lang).toBe("en");
-    expect(localStorage.getItem("lumatic.language")).toBe("en");
   });
 });

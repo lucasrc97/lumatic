@@ -1,6 +1,7 @@
 {
   "nav": {
     "main": "Navegação principal",
+    "global": "Menu global",
     "habits": "Hábitos",
     "tasks": "Tarefas",
     "calendar": "Calendário",
@@ -11,6 +12,12 @@
   },
   "language": {
     "label": "Idioma"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
   },
   "common": {
     "cancel": "Cancelar",
@@ -70,6 +77,14 @@
       "deleteTitle": "Excluir hábito?",
       "deleteDescription": "“{{name}}” irá para a lixeira, junto com seu histórico. Você pode restaurá-lo até que seja excluído de vez.",
       "delete": "Excluir"
+    },
+    "archived": {
+      "manage": "Arquivados",
+      "title": "Hábitos arquivados",
+      "description": "Hábitos arquivados não aparecem na lista e não podem ser marcados. O histórico é mantido.",
+      "empty": "Nenhum hábito arquivado.",
+      "unarchive": "Desarquivar",
+      "unarchiveLabel": "Desarquivar {{name}}"
     }
   },
   "trash": {
@@ -179,6 +194,7 @@
   "settings": {
     "title": "Configurações",
     "language": "Idioma",
+    "theme": "Tema",
     "trash": "Lixeira",
     "retentionLabel": "Dias até excluir de vez",
     "retentionHint": "Entre {{min}} e {{max}} dias.",

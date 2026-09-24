@@ -9,12 +9,14 @@ import { getErrorMessage } from "@/shared/lib/apiClient";
 import { toISODate, weekDays } from "@/shared/lib/dates";
 
 import {
+  useArchivedHabits,
   useCreateHabit,
   useDeleteHabit,
   useHabits,
   useToggleHabitDay,
   useUpdateHabit,
 } from "../hooks/useHabits";
+import ArchivedHabitsDialog from "./ArchivedHabitsDialog";
 import HabitCard from "./HabitCard";
 import HabitForm from "./HabitForm";
 
@@ -31,7 +33,9 @@ export default function HabitsPage() {
   const updateHabit = useUpdateHabit();
   const toggleDay = useToggleHabitDay();
   const deleteHabit = useDeleteHabit();
+  const archivedQuery = useArchivedHabits(today);
   const actionError = toggleDay.error ?? updateHabit.error ?? deleteHabit.error;
+  const manageError = updateHabit.error ?? deleteHabit.error ?? archivedQuery.error;
 
   const weekLabel = `${format(parseISO(range.from), t("dates.dayShort"), { locale })} – ${format(
     parseISO(range.to),
@@ -43,7 +47,14 @@ export default function HabitsPage() {
     <section className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t("habits.title")}</h1>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
+          <ArchivedHabitsDialog
+            habits={archivedQuery.data}
+            disabled={updateHabit.isPending || deleteHabit.isPending}
+            error={manageError ? getErrorMessage(manageError) : null}
+            onUnarchive={(id) => updateHabit.mutate({ id, input: { archived: false } })}
+            onDelete={(id) => deleteHabit.mutate(id)}
+          />
           <Button
             variant="ghost"
             size="icon"

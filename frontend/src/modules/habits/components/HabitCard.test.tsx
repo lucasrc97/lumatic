@@ -18,7 +18,7 @@ const HABIT: HabitProgress = {
   completed_dates: ["2026-09-22", "2026-09-23", "2026-09-24"],
 };
 
-function renderCard(onArchive = vi.fn()) {
+function renderCard({ onArchive = vi.fn(), onDelete = vi.fn() } = {}) {
   render(
     <HabitCard
       habit={HABIT}
@@ -27,9 +27,10 @@ function renderCard(onArchive = vi.fn()) {
       isUpdating={false}
       onToggleDay={vi.fn()}
       onArchive={onArchive}
+      onDelete={onDelete}
     />,
   );
-  return onArchive;
+  return { onArchive, onDelete };
 }
 
 describe("HabitCard", () => {
@@ -51,6 +52,7 @@ describe("HabitCard", () => {
         isUpdating={false}
         onToggleDay={vi.fn()}
         onArchive={vi.fn()}
+        onDelete={vi.fn()}
       />,
     );
 
@@ -58,12 +60,24 @@ describe("HabitCard", () => {
   });
 
   it("archives only after confirmation", async () => {
-    const onArchive = renderCard();
+    const { onArchive } = renderCard();
 
     await userEvent.click(screen.getByRole("button", { name: "Arquivar Meditar" }));
     expect(onArchive).not.toHaveBeenCalled();
 
     await userEvent.click(screen.getByRole("button", { name: "Arquivar" }));
     expect(onArchive).toHaveBeenCalledOnce();
+  });
+
+  it("moves the habit to the trash only after confirmation", async () => {
+    const { onDelete, onArchive } = renderCard();
+
+    await userEvent.click(screen.getByRole("button", { name: "Excluir Meditar" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent(/irá para a lixeira/);
+    expect(onDelete).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Excluir" }));
+    expect(onDelete).toHaveBeenCalledOnce();
+    expect(onArchive).not.toHaveBeenCalled();
   });
 });

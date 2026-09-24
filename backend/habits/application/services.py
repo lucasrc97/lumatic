@@ -1,7 +1,13 @@
 from dataclasses import replace
-from datetime import date
+from datetime import date, datetime
 
-from habits.application.dtos import HabitCreate, HabitProgress, HabitRead, HabitUpdate
+from habits.application.dtos import (
+    HabitCreate,
+    HabitProgress,
+    HabitRead,
+    HabitUpdate,
+    TrashedHabit,
+)
 from habits.domain.entities import Habit, current_streak, longest_streak
 from habits.domain.exceptions import (
     HabitArchivedError,
@@ -63,9 +69,35 @@ class HabitService:
         await self._get_active_habit(habit_id)
         await self._repository.remove_entry(habit_id, day)
 
+    async def delete_habit(self, habit_id: int, now: datetime) -> None:
+        """Move a habit to the trash; it can be restored until purged."""
+        habit = await self._get_habit(habit_id)
+        await self._repository.save(replace(habit, deleted_at=now))
+
+    async def list_trashed(self) -> list[TrashedHabit]:
+        return [TrashedHabit.from_entity(h) for h in await self._repository.list_deleted()]
+
+    async def restore_habit(self, habit_id: int) -> None:
+        habit = await self._get_trashed_habit(habit_id)
+        await self._repository.save(replace(habit, deleted_at=None))
+
+    async def purge_habit(self, habit_id: int) -> None:
+        await self._get_trashed_habit(habit_id)
+        await self._repository.purge(habit_id)
+
+    async def purge_trashed_before(self, cutoff: datetime) -> int:
+        return await self._repository.purge_deleted_before(cutoff)
+
     async def _get_habit(self, habit_id: int) -> Habit:
+        """A habit that is not in the trash; trashed habits behave as if they do not exist."""
         habit = await self._repository.get(habit_id)
-        if habit is None:
+        if habit is None or habit.deleted_at is not None:
+            raise HabitNotFoundError(habit_id)
+        return habit
+
+    async def _get_trashed_habit(self, habit_id: int) -> Habit:
+        habit = await self._repository.get(habit_id)
+        if habit is None or habit.deleted_at is None:
             raise HabitNotFoundError(habit_id)
         return habit
 

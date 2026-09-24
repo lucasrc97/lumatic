@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
@@ -40,6 +40,12 @@ async def create_habit(service: ServiceDep, data: HabitCreate) -> HabitRead:
 @router.patch("/{habit_id}", response_model=HabitRead)
 async def update_habit(service: ServiceDep, habit_id: int, data: HabitUpdate) -> HabitRead:
     return await service.update_habit(habit_id, data)
+
+
+@router.delete("/{habit_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_habit(service: ServiceDep, habit_id: int) -> None:
+    """Moves the habit to the trash."""
+    await service.delete_habit(habit_id, datetime.now(UTC))
 
 
 @router.put("/{habit_id}/entries/{day}", status_code=status.HTTP_204_NO_CONTENT)

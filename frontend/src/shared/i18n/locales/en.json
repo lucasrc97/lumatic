@@ -4,7 +4,9 @@
     "habits": "Habits",
     "calendar": "Calendar",
     "openMenu": "Open menu",
-    "menu": "Menu"
+    "menu": "Menu",
+    "trash": "Trash",
+    "settings": "Settings"
   },
   "language": {
     "label": "Language"
@@ -27,7 +29,8 @@
     "internal_error": "An unexpected server error occurred.",
     "habit_not_found": "Habit not found.",
     "habit_archived": "This habit is archived and cannot be changed.",
-    "invalid_date_range": "Invalid date range."
+    "invalid_date_range": "Invalid date range.",
+    "trash_module_not_found": "This kind of item cannot be restored from the trash."
   },
   "calendar": {
     "placeholder": "Items from each module will show up here as they are implemented."
@@ -52,7 +55,42 @@
       "archiveLabel": "Archive {{name}}",
       "archiveTitle": "Archive habit?",
       "archiveDescription": "“{{name}}” will no longer appear in the list. Its history is kept.",
-      "archive": "Archive"
+      "archive": "Archive",
+      "deleteLabel": "Delete {{name}}",
+      "deleteTitle": "Delete habit?",
+      "deleteDescription": "“{{name}}” will be moved to the trash along with its history. You can restore it until it is permanently deleted.",
+      "delete": "Delete"
     }
+  },
+  "trash": {
+    "title": "Trash",
+    "description_one": "Items are permanently deleted automatically {{count}} day after being moved to the trash.",
+    "description_other": "Items are permanently deleted automatically {{count}} days after being moved to the trash.",
+    "empty": "The trash is empty.",
+    "emptyTrash": "Empty trash",
+    "emptyTitle": "Empty trash?",
+    "emptyDescription": "Every item in the trash will be permanently deleted. This cannot be undone.",
+    "restore": "Restore",
+    "restoreLabel": "Restore {{title}}",
+    "purge": "Delete forever",
+    "purgeLabel": "Delete {{title}} forever",
+    "purgeTitle": "Delete forever?",
+    "purgeDescription": "“{{title}}” will be permanently deleted. This cannot be undone.",
+    "deletedOn": "Deleted on {{date}}",
+    "purgesToday": "deleted forever today",
+    "purgesIn_one": "deleted forever in {{count}} day",
+    "purgesIn_other": "deleted forever in {{count}} days",
+    "modules": {
+      "habits": "Habit"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "trash": "Trash",
+    "retentionLabel": "Days until permanent deletion",
+    "retentionHint": "Between {{min}} and {{max}} days.",
+    "save": "Save",
+    "saved": "Saved."
   }
 }

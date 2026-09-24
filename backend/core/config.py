@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     cors_origins: list[str] = ["http://localhost:5173"]
+    trash_auto_purge: bool = True
 
     @property
     def database_url(self) -> URL:

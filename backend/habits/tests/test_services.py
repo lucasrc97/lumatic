@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
@@ -9,8 +9,10 @@ from habits.domain.exceptions import (
     HabitNotFoundError,
     InvalidDateRangeError,
 )
+from habits.tests.conftest import InMemoryHabitRepository
 
 TODAY = date(2026, 9, 24)
+NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
 WEEK_START = date(2026, 9, 21)
 WEEK_END = date(2026, 9, 27)
 
@@ -87,3 +89,53 @@ async def test_invalid_date_ranges_are_rejected(
 ) -> None:
     with pytest.raises(InvalidDateRangeError):
         await service.list_progress(start, end, TODAY)
+
+
+async def test_deleted_habit_goes_to_trash_and_can_be_restored(service: HabitService) -> None:
+    habit = await service.create_habit(HabitCreate(name="Run"))
+    await service.complete_day(habit.id, TODAY)
+
+    await service.delete_habit(habit.id, NOW)
+
+    assert await service.list_progress(WEEK_START, WEEK_END, TODAY, True) == []
+    [trashed] = await service.list_trashed()
+    assert (trashed.id, trashed.name, trashed.deleted_at) == (habit.id, "Run", NOW)
+    with pytest.raises(HabitNotFoundError):
+        await service.update_habit(habit.id, HabitUpdate(name="x"))
+    with pytest.raises(HabitNotFoundError):
+        await service.complete_day(habit.id, TODAY)
+
+    await service.restore_habit(habit.id)
+
+    [progress] = await service.list_progress(WEEK_START, WEEK_END, TODAY)
+    assert progress.completed_dates == [TODAY]
+    assert await service.list_trashed() == []
+
+
+async def test_purge_permanently_removes_only_trashed_habits(
+    service: HabitService, repository: InMemoryHabitRepository
+) -> None:
+    habit = await service.create_habit(HabitCreate(name="Run"))
+    await service.complete_day(habit.id, TODAY)
+
+    with pytest.raises(HabitNotFoundError):
+        await service.purge_habit(habit.id)  # not in the trash
+    await service.delete_habit(habit.id, NOW)
+    await service.purge_habit(habit.id)
+
+    assert await service.list_trashed() == []
+    assert repository.entries == set()
+    with pytest.raises(HabitNotFoundError):
+        await service.restore_habit(habit.id)
+
+
+async def test_purge_trashed_before_keeps_recent_items(service: HabitService) -> None:
+    old = await service.create_habit(HabitCreate(name="Old"))
+    recent = await service.create_habit(HabitCreate(name="Recent"))
+    await service.delete_habit(old.id, NOW - timedelta(days=40))
+    await service.delete_habit(recent.id, NOW - timedelta(days=5))
+
+    purged = await service.purge_trashed_before(NOW - timedelta(days=30))
+
+    assert purged == 1
+    assert [h.id for h in await service.list_trashed()] == [recent.id]

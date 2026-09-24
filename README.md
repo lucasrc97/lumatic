@@ -17,6 +17,8 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 
 **Calendário** — unified view that aggregates events, task due dates, habit schedules and financial payment dates from all modules. It is a view, not a standalone module.
 
+**Lixeira (Trash)** — deleted items from every module go to the trash, where they can be restored or permanently deleted. Items are purged automatically after a retention period (default 30 days, editable in **Configurações / Settings**).
+
 ---
 
 ## Interface
@@ -45,6 +47,20 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 Architecture: **Modular Monolith** with Clean Architecture per module.
 Each module owns its domain, service, repository, API, and tests.
 Modules do not share database tables.
+
+### Trash (cross-module)
+
+- **Problem:** deletions in every module must be recoverable for a while, then disappear on their own.
+- **Approach:** each module soft-deletes its own rows (`deleted_at`) and exposes list / restore / purge operations
+  through its service. The `trash` module owns no tables: it aggregates modules through the `TrashSource`
+  contract (`trash/domain/sources.py`), with one adapter per module in `trash/infrastructure/sources.py`.
+- **Automatic purge:** a background task started in the FastAPI lifespan purges items older than the retention
+  period at startup and every 24 hours (disable with `TRASH_AUTO_PURGE=false`). Retention lives in the
+  `preferences` module.
+- **Adding a module to the trash:** add `deleted_at` + trash operations to the module, write its adapter and
+  register it in `build_trash_service`.
+- **Trade-off:** an in-process loop instead of a job scheduler — enough for a single self-hosted instance; with
+  several API replicas each would run its own (idempotent) purge.
 
 ---
 
@@ -113,6 +129,8 @@ Lumatic/
 │   ├── app/main.py
 │   ├── core/               (config, database)
 │   ├── habits/             (V0)
+│   ├── preferences/        (app-wide settings, e.g. trash retention)
+│   ├── trash/              (aggregates deleted items from every module)
 │   ├── tasks/              (V1)
 │   ├── events/             (V2)
 │   ├── financial/          (V3)

@@ -4,7 +4,9 @@
     "habits": "Hábitos",
     "calendar": "Calendário",
     "openMenu": "Abrir menu",
-    "menu": "Menu"
+    "menu": "Menu",
+    "trash": "Lixeira",
+    "settings": "Configurações"
   },
   "language": {
     "label": "Idioma"
@@ -27,7 +29,8 @@
     "internal_error": "Ocorreu um erro inesperado no servidor.",
     "habit_not_found": "Hábito não encontrado.",
     "habit_archived": "Este hábito está arquivado e não pode ser alterado.",
-    "invalid_date_range": "Intervalo de datas inválido."
+    "invalid_date_range": "Intervalo de datas inválido.",
+    "trash_module_not_found": "Este tipo de item não pode ser restaurado da lixeira."
   },
   "calendar": {
     "placeholder": "Os itens de cada módulo aparecerão aqui conforme forem implementados."
@@ -52,7 +55,42 @@
       "archiveLabel": "Arquivar {{name}}",
       "archiveTitle": "Arquivar hábito?",
       "archiveDescription": "“{{name}}” deixará de aparecer na lista. O histórico é mantido.",
-      "archive": "Arquivar"
+      "archive": "Arquivar",
+      "deleteLabel": "Excluir {{name}}",
+      "deleteTitle": "Excluir hábito?",
+      "deleteDescription": "“{{name}}” irá para a lixeira, junto com seu histórico. Você pode restaurá-lo até que seja excluído de vez.",
+      "delete": "Excluir"
     }
+  },
+  "trash": {
+    "title": "Lixeira",
+    "description_one": "Os itens são excluídos de vez automaticamente {{count}} dia após irem para a lixeira.",
+    "description_other": "Os itens são excluídos de vez automaticamente {{count}} dias após irem para a lixeira.",
+    "empty": "A lixeira está vazia.",
+    "emptyTrash": "Esvaziar lixeira",
+    "emptyTitle": "Esvaziar lixeira?",
+    "emptyDescription": "Todos os itens da lixeira serão excluídos de vez. Esta ação não pode ser desfeita.",
+    "restore": "Restaurar",
+    "restoreLabel": "Restaurar {{title}}",
+    "purge": "Excluir de vez",
+    "purgeLabel": "Excluir {{title}} de vez",
+    "purgeTitle": "Excluir de vez?",
+    "purgeDescription": "“{{title}}” será excluído permanentemente. Esta ação não pode ser desfeita.",
+    "deletedOn": "Excluído em {{date}}",
+    "purgesToday": "excluído de vez hoje",
+    "purgesIn_one": "excluído de vez em {{count}} dia",
+    "purgesIn_other": "excluído de vez em {{count}} dias",
+    "modules": {
+      "habits": "Hábito"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma",
+    "trash": "Lixeira",
+    "retentionLabel": "Dias até excluir de vez",
+    "retentionHint": "Entre {{min}} e {{max}} dias.",
+    "save": "Salvar",
+    "saved": "Salvo."
   }
 }

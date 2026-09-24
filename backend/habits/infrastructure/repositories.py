@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
@@ -16,6 +16,7 @@ def _to_entity(model: HabitModel) -> Habit:
         color=model.color,
         archived=model.archived,
         created_at=model.created_at,
+        deleted_at=model.deleted_at,
     )
 
 
@@ -24,7 +25,11 @@ class SqlAlchemyHabitRepository:
         self._session = session
 
     async def list_habits(self, include_archived: bool) -> list[Habit]:
-        query = select(HabitModel).order_by(HabitModel.created_at, HabitModel.id)
+        query = (
+            select(HabitModel)
+            .where(HabitModel.deleted_at.is_(None))
+            .order_by(HabitModel.created_at, HabitModel.id)
+        )
         if not include_archived:
             query = query.where(HabitModel.archived.is_(False))
         result = await self._session.scalars(query)
@@ -46,6 +51,7 @@ class SqlAlchemyHabitRepository:
         model.name = habit.name
         model.color = habit.color
         model.archived = habit.archived
+        model.deleted_at = habit.deleted_at
         await self._session.commit()
         return _to_entity(model)
 
@@ -81,3 +87,25 @@ class SqlAlchemyHabitRepository:
             )
         )
         await self._session.commit()
+
+    async def list_deleted(self) -> list[Habit]:
+        result = await self._session.scalars(
+            select(HabitModel)
+            .where(HabitModel.deleted_at.is_not(None))
+            .order_by(HabitModel.deleted_at.desc(), HabitModel.id)
+        )
+        return [_to_entity(model) for model in result]
+
+    async def purge(self, habit_id: int) -> None:
+        # Entries go with the habit through the ON DELETE CASCADE foreign key.
+        await self._session.execute(delete(HabitModel).where(HabitModel.id == habit_id))
+        await self._session.commit()
+
+    async def purge_deleted_before(self, cutoff: datetime) -> int:
+        result = await self._session.execute(
+            delete(HabitModel)
+            .where(HabitModel.deleted_at < cutoff)
+            .returning(HabitModel.id)
+        )
+        await self._session.commit()
+        return len(result.all())

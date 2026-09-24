@@ -43,6 +43,18 @@ class HabitRead(BaseModel):
         )
 
 
+class TrashedHabit(BaseModel):
+    id: int
+    name: str
+    deleted_at: datetime
+
+    @classmethod
+    def from_entity(cls, habit: Habit) -> "TrashedHabit":
+        if habit.deleted_at is None:
+            raise ValueError(f"Habit {habit.id} is not in the trash.")
+        return cls(id=habit.id, name=habit.name, deleted_at=habit.deleted_at)
+
+
 class HabitProgress(HabitRead):
     current_streak: int
     longest_streak: int

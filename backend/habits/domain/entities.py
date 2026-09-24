@@ -7,13 +7,17 @@ _ONE_DAY = timedelta(days=1)
 
 @dataclass(frozen=True)
 class Habit:
-    """A daily habit. Completions are stored separately as one entry per date."""
+    """A daily habit. Completions are stored separately as one entry per date.
+
+    A habit with `deleted_at` set is in the trash: hidden everywhere until restored or purged.
+    """
 
     id: int
     name: str
     color: str
     archived: bool
     created_at: datetime
+    deleted_at: datetime | None = None
 
 
 def current_streak(completed: Iterable[date], today: date) -> int:

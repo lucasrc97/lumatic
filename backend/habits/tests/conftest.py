@@ -20,7 +20,11 @@ class InMemoryHabitRepository:
         self._next_id = 1
 
     async def list_habits(self, include_archived: bool) -> list[Habit]:
-        return [h for h in self.habits.values() if include_archived or not h.archived]
+        return [
+            h
+            for h in self.habits.values()
+            if h.deleted_at is None and (include_archived or not h.archived)
+        ]
 
     async def get(self, habit_id: int) -> Habit | None:
         return self.habits.get(habit_id)
@@ -55,6 +59,22 @@ class InMemoryHabitRepository:
 
     async def remove_entry(self, habit_id: int, entry_date: date) -> None:
         self.entries.discard((habit_id, entry_date))
+
+    async def list_deleted(self) -> list[Habit]:
+        deleted = [h for h in self.habits.values() if h.deleted_at is not None]
+        return sorted(deleted, key=lambda h: (h.deleted_at, -h.id), reverse=True)
+
+    async def purge(self, habit_id: int) -> None:
+        self.habits.pop(habit_id, None)
+        self.entries = {entry for entry in self.entries if entry[0] != habit_id}
+
+    async def purge_deleted_before(self, cutoff: datetime) -> int:
+        expired = [
+            h.id for h in self.habits.values() if h.deleted_at is not None and h.deleted_at < cutoff
+        ]
+        for habit_id in expired:
+            await self.purge(habit_id)
+        return len(expired)
 
 
 @pytest.fixture

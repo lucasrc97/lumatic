@@ -38,6 +38,15 @@ export function useUpdateHabit() {
   });
 }
 
+export function useDeleteHabit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => habitsApi.remove(id),
+    // The habit leaves this module's lists and shows up in the trash, which lives elsewhere.
+    onSuccess: () => queryClient.invalidateQueries(),
+  });
+}
+
 export function useToggleHabitDay() {
   const invalidate = useInvalidateHabits();
   return useMutation({

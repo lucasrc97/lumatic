@@ -10,6 +10,7 @@ import { toISODate, weekDays } from "@/shared/lib/dates";
 
 import {
   useCreateHabit,
+  useDeleteHabit,
   useHabits,
   useToggleHabitDay,
   useUpdateHabit,
@@ -29,7 +30,8 @@ export default function HabitsPage() {
   const createHabit = useCreateHabit();
   const updateHabit = useUpdateHabit();
   const toggleDay = useToggleHabitDay();
-  const actionError = toggleDay.error ?? updateHabit.error;
+  const deleteHabit = useDeleteHabit();
+  const actionError = toggleDay.error ?? updateHabit.error ?? deleteHabit.error;
 
   const weekLabel = `${format(parseISO(range.from), t("dates.dayShort"), { locale })} – ${format(
     parseISO(range.to),
@@ -105,6 +107,7 @@ export default function HabitsPage() {
             isUpdating={toggleDay.isPending && toggleDay.variables?.habitId === habit.id}
             onToggleDay={(day, completed) => toggleDay.mutate({ habitId: habit.id, day, completed })}
             onArchive={() => updateHabit.mutate({ id: habit.id, input: { archived: true } })}
+            onDelete={() => deleteHabit.mutate(habit.id)}
           />
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { CalendarDays, ListChecks } from "lucide-react";
+import { CalendarDays, ListChecks, Settings, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
@@ -8,6 +8,8 @@ import { cn } from "@/shared/lib/utils";
 const NAV_ITEMS = [
   { to: "/habits", labelKey: "nav.habits", icon: ListChecks },
   { to: "/calendar", labelKey: "nav.calendar", icon: CalendarDays },
+  { to: "/trash", labelKey: "nav.trash", icon: Trash2 },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;
 
 interface SidebarProps {

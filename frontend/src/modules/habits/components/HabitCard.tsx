@@ -1,18 +1,9 @@
-import { Archive, Flame } from "lucide-react";
+import { Archive, Flame, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import ConfirmDialog from "@/shared/components/ConfirmDialog";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/components/ui/dialog";
 import { Progress } from "@/shared/components/ui/progress";
 
 import type { HabitProgress } from "../types/habit";
@@ -25,6 +16,7 @@ interface HabitCardProps {
   isUpdating: boolean;
   onToggleDay: (day: string, completed: boolean) => void;
   onArchive: () => void;
+  onDelete: () => void;
 }
 
 export default function HabitCard({
@@ -34,6 +26,7 @@ export default function HabitCard({
   isUpdating,
   onToggleDay,
   onArchive,
+  onDelete,
 }: HabitCardProps) {
   const { t } = useTranslation();
   const doneCount = habit.completed_dates.length;
@@ -58,29 +51,39 @@ export default function HabitCard({
           </p>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={t("habits.card.archiveLabel", { name: habit.name })}>
-              <Archive className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("habits.card.archiveTitle")}</DialogTitle>
-              <DialogDescription>
-                {t("habits.card.archiveDescription", { name: habit.name })}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="gap-2">
-              <DialogClose asChild>
-                <Button variant="outline">{t("common.cancel")}</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button onClick={onArchive}>{t("habits.card.archive")}</Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div className="flex shrink-0">
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("habits.card.archiveLabel", { name: habit.name })}
+              >
+                <Archive className="h-4 w-4" />
+              </Button>
+            }
+            title={t("habits.card.archiveTitle")}
+            description={t("habits.card.archiveDescription", { name: habit.name })}
+            confirmLabel={t("habits.card.archive")}
+            onConfirm={onArchive}
+          />
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("habits.card.deleteLabel", { name: habit.name })}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            }
+            title={t("habits.card.deleteTitle")}
+            description={t("habits.card.deleteDescription", { name: habit.name })}
+            confirmLabel={t("habits.card.delete")}
+            onConfirm={onDelete}
+            destructive
+          />
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-3 p-4 pt-0">

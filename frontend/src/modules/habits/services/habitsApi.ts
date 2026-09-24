@@ -28,6 +28,11 @@ export const habitsApi = {
     return data;
   },
 
+  /** Moves the habit to the trash. */
+  async remove(id: number): Promise<void> {
+    await apiClient.delete(`${BASE_PATH}/${id}`);
+  },
+
   async completeDay(id: number, day: string): Promise<void> {
     await apiClient.put(`${BASE_PATH}/${id}/entries/${day}`);
   },

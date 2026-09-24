@@ -78,3 +78,12 @@ def test_inverted_date_range_returns_422(client: TestClient) -> None:
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "invalid_date_range"
+
+
+def test_delete_moves_habit_out_of_the_list(client: TestClient) -> None:
+    habit_id = create_habit(client)
+
+    assert client.delete(f"{BASE}/{habit_id}").status_code == 204
+
+    assert client.get(BASE, params={**WEEK, "include_archived": "true"}).json() == []
+    assert client.delete(f"{BASE}/{habit_id}").status_code == 404

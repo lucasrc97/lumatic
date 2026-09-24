@@ -42,6 +42,21 @@ describe("HabitCard", () => {
     expect(screen.getByText("3/7")).toBeInTheDocument();
   });
 
+  it("uses the plural form for a zero streak", () => {
+    render(
+      <HabitCard
+        habit={{ ...HABIT, current_streak: 0 }}
+        days={DAYS}
+        today="2026-09-24"
+        isUpdating={false}
+        onToggleDay={vi.fn()}
+        onArchive={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/0 dias seguidos/)).toBeInTheDocument();
+  });
+
   it("archives only after confirmation", async () => {
     const onArchive = renderCard();
 

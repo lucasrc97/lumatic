@@ -23,6 +23,7 @@ Personal life management webapp. Self-hosted, mobile-responsive.
 
 - Collapsible left sidebar (or repositionable per user preference)
 - Dark / light theme toggle
+- Language toggle — Português (default) / English; the choice is saved in the browser
 - Fully responsive — works on mobile via PWA install from browser
 
 ---

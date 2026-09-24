@@ -1,9 +1,10 @@
 import { addWeeks, format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/shared/components/ui/button";
+import { useDateLocale } from "@/shared/i18n";
 import { getErrorMessage } from "@/shared/lib/apiClient";
 import { toISODate, weekDays } from "@/shared/lib/dates";
 
@@ -17,6 +18,8 @@ import HabitCard from "./HabitCard";
 import HabitForm from "./HabitForm";
 
 export default function HabitsPage() {
+  const { t } = useTranslation();
+  const locale = useDateLocale();
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const today = toISODate(new Date());
   const days = weekDays(referenceDate).map(toISODate);
@@ -28,21 +31,21 @@ export default function HabitsPage() {
   const toggleDay = useToggleHabitDay();
   const actionError = toggleDay.error ?? updateHabit.error;
 
-  const weekLabel = `${format(parseISO(range.from), "d MMM", { locale: ptBR })} – ${format(
+  const weekLabel = `${format(parseISO(range.from), t("dates.dayShort"), { locale })} – ${format(
     parseISO(range.to),
-    "d MMM",
-    { locale: ptBR },
+    t("dates.dayShort"),
+    { locale },
   )}`;
 
   return (
     <section className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Hábitos</h1>
+        <h1 className="text-2xl font-semibold">{t("habits.title")}</h1>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Semana anterior"
+            aria-label={t("habits.previousWeek")}
             onClick={() => setReferenceDate((date) => addWeeks(date, -1))}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -50,7 +53,7 @@ export default function HabitsPage() {
           <Button
             variant="outline"
             size="sm"
-            title="Voltar para a semana atual"
+            title={t("habits.currentWeek")}
             onClick={() => setReferenceDate(new Date())}
           >
             {weekLabel}
@@ -58,7 +61,7 @@ export default function HabitsPage() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Próxima semana"
+            aria-label={t("habits.nextWeek")}
             onClick={() => setReferenceDate((date) => addWeeks(date, 1))}
           >
             <ChevronRight className="h-4 w-4" />
@@ -80,7 +83,7 @@ export default function HabitsPage() {
         </p>
       )}
 
-      {habitsQuery.isPending && <p className="text-sm text-muted-foreground">Carregando…</p>}
+      {habitsQuery.isPending && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
       {habitsQuery.isError && (
         <p role="alert" className="text-sm text-destructive">
           {getErrorMessage(habitsQuery.error)}
@@ -88,7 +91,7 @@ export default function HabitsPage() {
       )}
       {habitsQuery.data?.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Nenhum hábito ainda. Adicione o primeiro acima.
+          {t("habits.empty")}
         </p>
       )}
 

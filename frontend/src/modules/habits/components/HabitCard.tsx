@@ -1,4 +1,5 @@
 import { Archive, Flame } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -34,6 +35,7 @@ export default function HabitCard({
   onToggleDay,
   onArchive,
 }: HabitCardProps) {
+  const { t } = useTranslation();
   const doneCount = habit.completed_dates.length;
   const percent = days.length ? Math.round((doneCount / days.length) * 100) : 0;
 
@@ -51,30 +53,30 @@ export default function HabitCard({
           </CardTitle>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <Flame className="h-4 w-4" aria-hidden />
-            {habit.current_streak} {habit.current_streak === 1 ? "dia seguido" : "dias seguidos"}
-            <span aria-hidden>·</span> recorde {habit.longest_streak}
+            {t("habits.card.streak", { count: habit.current_streak })}
+            <span aria-hidden>·</span> {t("habits.card.record", { count: habit.longest_streak })}
           </p>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={`Arquivar ${habit.name}`}>
+            <Button variant="ghost" size="icon" aria-label={t("habits.card.archiveLabel", { name: habit.name })}>
               <Archive className="h-4 w-4" />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Arquivar hábito?</DialogTitle>
+              <DialogTitle>{t("habits.card.archiveTitle")}</DialogTitle>
               <DialogDescription>
-                “{habit.name}” deixará de aparecer na lista. O histórico é mantido.
+                {t("habits.card.archiveDescription", { name: habit.name })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2">
               <DialogClose asChild>
-                <Button variant="outline">Cancelar</Button>
+                <Button variant="outline">{t("common.cancel")}</Button>
               </DialogClose>
               <DialogClose asChild>
-                <Button onClick={onArchive}>Arquivar</Button>
+                <Button onClick={onArchive}>{t("habits.card.archive")}</Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>
@@ -91,7 +93,7 @@ export default function HabitCard({
           onToggle={onToggleDay}
         />
         <div className="flex items-center gap-2">
-          <Progress value={percent} className="h-2" aria-label="Progresso da semana" />
+          <Progress value={percent} className="h-2" aria-label={t("habits.card.weekProgress")} />
           <span className="text-xs tabular-nums text-muted-foreground">
             {doneCount}/{days.length}
           </span>

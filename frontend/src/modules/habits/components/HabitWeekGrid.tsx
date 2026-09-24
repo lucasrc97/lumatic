@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
+import { useDateLocale } from "@/shared/i18n";
 import { cn } from "@/shared/lib/utils";
 
 interface HabitWeekGridProps {
@@ -21,6 +22,8 @@ export default function HabitWeekGrid({
   disabled = false,
   onToggle,
 }: HabitWeekGridProps) {
+  const { t } = useTranslation();
+  const locale = useDateLocale();
   const completed = new Set(completedDates);
 
   return (
@@ -33,7 +36,7 @@ export default function HabitWeekGrid({
             key={day}
             type="button"
             aria-pressed={done}
-            aria-label={format(date, "EEEE, d 'de' MMMM", { locale: ptBR })}
+            aria-label={format(date, t("dates.dayLong"), { locale })}
             disabled={disabled || day > today}
             onClick={() => onToggle(day, !done)}
             className={cn(
@@ -43,7 +46,7 @@ export default function HabitWeekGrid({
             )}
             style={done ? { backgroundColor: color } : undefined}
           >
-            <span className="uppercase">{format(date, "EEEEEE", { locale: ptBR })}</span>
+            <span className="uppercase">{format(date, "EEEEEE", { locale })}</span>
             <span className="text-sm font-semibold">{format(date, "d")}</span>
           </button>
         );

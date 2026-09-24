@@ -32,4 +32,19 @@ describe("Sidebar", () => {
 
     expect(onNavigate).toHaveBeenCalledOnce();
   });
+
+  it("switches the interface language and remembers the choice", async () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "English" }));
+
+    expect(screen.getByRole("link", { name: "Habits" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
+    expect(document.documentElement.lang).toBe("en");
+    expect(localStorage.getItem("lumatic.language")).toBe("en");
+  });
 });

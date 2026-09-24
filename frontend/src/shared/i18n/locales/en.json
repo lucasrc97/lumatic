@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "main": "Main navigation",
+    "habits": "Habits",
+    "calendar": "Calendar",
+    "openMenu": "Open menu",
+    "menu": "Menu"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading…",
+    "add": "Add"
+  },
+  "dates": {
+    "monthYear": "MMMM yyyy",
+    "dayLong": "EEEE, MMMM d",
+    "dayShort": "MMM d"
+  },
+  "errors": {
+    "network": "Could not connect to the server.",
+    "generic": "Something went wrong. Please try again.",
+    "validation_error": "Some data is invalid. Please review and try again.",
+    "internal_error": "An unexpected server error occurred.",
+    "habit_not_found": "Habit not found.",
+    "habit_archived": "This habit is archived and cannot be changed.",
+    "invalid_date_range": "Invalid date range."
+  },
+  "calendar": {
+    "placeholder": "Items from each module will show up here as they are implemented."
+  },
+  "habits": {
+    "title": "Habits",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "currentWeek": "Back to the current week",
+    "empty": "No habits yet. Add the first one above.",
+    "form": {
+      "nameLabel": "Habit name",
+      "namePlaceholder": "New habit",
+      "colorLabel": "Color"
+    },
+    "card": {
+      "streak_zero": "{{count}} days in a row",
+      "streak_one": "{{count}} day in a row",
+      "streak_other": "{{count}} days in a row",
+      "record": "best {{count}}",
+      "weekProgress": "Weekly progress",
+      "archiveLabel": "Archive {{name}}",
+      "archiveTitle": "Archive habit?",
+      "archiveDescription": "“{{name}}” will no longer appear in the list. Its history is kept.",
+      "archive": "Archive"
+    }
+  }
+}

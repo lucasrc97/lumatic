@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 
 import { Button } from "@/shared/components/ui/button";
@@ -8,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/shared/componen
 import Sidebar from "./Sidebar";
 
 export default function AppLayout() {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -20,12 +22,12 @@ export default function AppLayout() {
         <header className="flex items-center gap-2 border-b px-4 py-2 md:hidden">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Abrir menu">
+              <Button variant="ghost" size="icon" aria-label={t("nav.openMenu")}>
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0" aria-describedby={undefined}>
-              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetTitle className="sr-only">{t("nav.menu")}</SheetTitle>
               <Sidebar onNavigate={() => setMenuOpen(false)} />
             </SheetContent>
           </Sheet>

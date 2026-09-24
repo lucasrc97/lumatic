@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -16,6 +17,7 @@ interface HabitFormProps {
 }
 
 export default function HabitForm({ onSubmit, isSubmitting, error }: HabitFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [color, setColor] = useState(DEFAULT_COLOR);
   const trimmedName = name.trim();
@@ -35,18 +37,18 @@ export default function HabitForm({ onSubmit, isSubmitting, error }: HabitFormPr
     <form onSubmit={handleSubmit} className="space-y-1">
       <div className="flex gap-2">
         <label htmlFor="habit-name" className="sr-only">
-          Nome do hábito
+          {t("habits.form.nameLabel")}
         </label>
         <Input
           id="habit-name"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Novo hábito"
+          placeholder={t("habits.form.namePlaceholder")}
           maxLength={100}
           autoComplete="off"
         />
         <label htmlFor="habit-color" className="sr-only">
-          Cor
+          {t("habits.form.colorLabel")}
         </label>
         <Input
           id="habit-color"
@@ -57,7 +59,7 @@ export default function HabitForm({ onSubmit, isSubmitting, error }: HabitFormPr
         />
         <Button type="submit" disabled={!trimmedName || isSubmitting} className="shrink-0">
           <Plus className="h-4 w-4" aria-hidden />
-          <span className="sr-only sm:not-sr-only">Adicionar</span>
+          <span className="sr-only sm:not-sr-only">{t("common.add")}</span>
         </Button>
       </div>
       {error && (

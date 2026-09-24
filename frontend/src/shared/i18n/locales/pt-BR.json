@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "main": "Navegação principal",
+    "habits": "Hábitos",
+    "calendar": "Calendário",
+    "openMenu": "Abrir menu",
+    "menu": "Menu"
+  },
+  "language": {
+    "label": "Idioma"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "loading": "Carregando…",
+    "add": "Adicionar"
+  },
+  "dates": {
+    "monthYear": "MMMM 'de' yyyy",
+    "dayLong": "EEEE, d 'de' MMMM",
+    "dayShort": "d MMM"
+  },
+  "errors": {
+    "network": "Não foi possível conectar ao servidor.",
+    "generic": "Algo deu errado. Tente novamente.",
+    "validation_error": "Alguns dados são inválidos. Revise e tente novamente.",
+    "internal_error": "Ocorreu um erro inesperado no servidor.",
+    "habit_not_found": "Hábito não encontrado.",
+    "habit_archived": "Este hábito está arquivado e não pode ser alterado.",
+    "invalid_date_range": "Intervalo de datas inválido."
+  },
+  "calendar": {
+    "placeholder": "Os itens de cada módulo aparecerão aqui conforme forem implementados."
+  },
+  "habits": {
+    "title": "Hábitos",
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Próxima semana",
+    "currentWeek": "Voltar para a semana atual",
+    "empty": "Nenhum hábito ainda. Adicione o primeiro acima.",
+    "form": {
+      "nameLabel": "Nome do hábito",
+      "namePlaceholder": "Novo hábito",
+      "colorLabel": "Cor"
+    },
+    "card": {
+      "streak_zero": "{{count}} dias seguidos",
+      "streak_one": "{{count}} dia seguido",
+      "streak_other": "{{count}} dias seguidos",
+      "record": "recorde {{count}}",
+      "weekProgress": "Progresso da semana",
+      "archiveLabel": "Arquivar {{name}}",
+      "archiveTitle": "Arquivar hábito?",
+      "archiveDescription": "“{{name}}” deixará de aparecer na lista. O histórico é mantido.",
+      "archive": "Arquivar"
+    }
+  }
+}
